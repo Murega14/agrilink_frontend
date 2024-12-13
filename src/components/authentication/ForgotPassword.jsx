@@ -4,12 +4,12 @@ function ForgotPassword() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-gray-50 flex items-center justify-center">
       <div className="relative w-full max-w-md">
-        <div className="absolute inset-0 bg-[url('/images/agri-pattern.svg')] bg-repeat opacity-10 z-0"></div>
+        <div className="absolute inset-0 bg-repeat opacity-10 z-0"></div>
         <div className="bg-white p-8 rounded-lg shadow-lg border border-green-300 relative z-10">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-800">Password Reset</h2>
             <a
-              href="/index"
+              href="/"
               className="text-sm text-green-600 hover:text-green-500 font-medium"
             >
               Back to Login
@@ -19,7 +19,7 @@ function ForgotPassword() {
             Enter your email to receive a password reset link.
           </p>
 
-          <form method="post" action="/authentication/forgot_password" className="space-y-4">
+          <form method="post" action="/forgotpassword" className="space-y-4">
             <div>
               <label
                 htmlFor="email"

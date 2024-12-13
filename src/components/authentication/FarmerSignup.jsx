@@ -49,7 +49,7 @@ const FarmerSignup = () => {
                             <h3 className="text-2xl font-semibold text-gray-800">Create Farmer Account</h3>
                             <div className="text-sm">
                                 <span className="text-gray-600">Already registered? </span>
-                                <a href="/login_farmer" className="text-green-600 hover:text-green-500 font-medium">Sign in</a>
+                                <a href="/login/farmer" className="text-green-600 hover:text-green-500 font-medium">Sign in</a>
                             </div>
                         </div>
 

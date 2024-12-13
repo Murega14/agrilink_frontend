@@ -81,13 +81,13 @@ const LoginFarmer = () => {
               <h3 className="text-2xl font-semibold text-gray-800">Sign In</h3>
               <div className="text-sm">
                 <span className="text-gray-600">New Farmer? </span>
-                <a href="/signup_farmer" className="text-green-600 hover:text-green-500 font-medium">
+                <a href="/signup/farmer" className="text-green-600 hover:text-green-500 font-medium">
                   Create account
                 </a>
               </div>
             </div>
 
-            <form className="space-y-6" method="post" action="/login_farmer">
+            <form className="space-y-6" method="post" action="/login/farmer">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
@@ -120,7 +120,7 @@ const LoginFarmer = () => {
                   />
                   <label className="ml-2 block text-sm text-gray-700">Remember me</label>
                 </div>
-                <a href="/forgot_password" className="text-sm text-green-600 hover:text-green-500">
+                <a href="/forgotpassword" className="text-sm text-green-600 hover:text-green-500">
                   Forgot password?
                 </a>
               </div>

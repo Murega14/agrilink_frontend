@@ -75,7 +75,7 @@ const Hero = () => {
               </div>
 
               <button className="mt-10 bg-white text-green-700 px-10 py-4 rounded-lg hover:bg-green-50 transition-colors text-xl font-bold shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                <a href="/login_buyer" className="block w-full">Sign Up as Buyer</a>
+                <a href="/login/buyer" className="block w-full">Sign Up as Buyer</a>
               </button>
             </div>
           </article>
@@ -143,7 +143,7 @@ const Hero = () => {
               </div>
 
               <button className="mt-10 bg-green-600 text-white px-10 py-4 rounded-lg hover:bg-green-700 transition-colors text-xl font-bold shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2">
-                <a href="/login_farmer" className="block w-full">Register as Farmer</a>
+                <a href="/login/farmer" className="block w-full">Register as Farmer</a>
               </button>
             </div>
           </article>
