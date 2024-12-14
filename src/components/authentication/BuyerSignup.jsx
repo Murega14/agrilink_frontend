@@ -1,6 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const BuyerSignup = () => {
+    const [formData, setFormData] = useState({
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone_number: '',
+        password: '',
+        confirm_password: ''
+    });
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (formData.password !== formData.confirm_password) {
+            setError('Passwords do not match');
+            return;
+        }
+
+        //preparing data for submission
+        const { confirm_password, ...submitData} = formData;
+
+        try {
+            const response = await axios.post('http;//localhost:5000/signup/buyer', submitData);
+
+            if (response.data.success) {
+                navigate('/marketplace');
+            }
+        } catch (err) {
+            setError(err.response?.data?.error || 'An error occured')
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 to-gray-50">
@@ -53,48 +97,106 @@ const BuyerSignup = () => {
                             </div>
                         </div>
 
-                        <form className="space-y-6" method="post" action="/signup_farmer">
+                        {error && (
+                            <div className="mb-4 p-4 bg-red-50 border border-red-300 text-red-800 rounded">
+                                {error}
+                            </div>
+                        )}
+
+                        <form className="space-y-6" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                                    <input type="text" required className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="John" name="first_name" />
+                                    <input 
+                                        type="text" 
+                                        required 
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                        placeholder="John" 
+                                        name="first_name"
+                                        value={formData.first_name}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                                    <input type="text" required className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Doe" name="last_name" />
+                                    <input 
+                                        type="text" 
+                                        required 
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                        placeholder="Doe" 
+                                        name="last_name"
+                                        value={formData.last_name}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                    <input type="email" required className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="your@email.com" name="email" />
+                                    <input 
+                                        type="email" 
+                                        required 
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                        placeholder="your@email.com" 
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                    <input type="tel" required className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="0701234567" name="phone_number" />
+                                    <input 
+                                        type="tel" 
+                                        required 
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                        placeholder="0701234567" 
+                                        name="phone_number"
+                                        value={formData.phone_number}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Create Password</label>
-                                    <input type="password" required className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" name="password" />
+                                    <input 
+                                        type="password" 
+                                        required 
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                                    <input type="password" required className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+                                    <input 
+                                        type="password" 
+                                        required 
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                        name="confirm_password"
+                                        value={formData.confirm_password}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
                             <div className="flex items-center">
-                                <input type="checkbox" required className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" />
+                                <input 
+                                    type="checkbox" 
+                                    required 
+                                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" 
+                                />
                                 <label className="ml-2 block text-sm text-gray-700">
                                     I agree to the <a href="#" className="text-green-600 hover:text-green-500">Terms and Conditions</a>
                                 </label>
                             </div>
-                            <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition duration-200">
+                            <button 
+                                type="submit" 
+                                className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition duration-200"
+                            >
                                 Create Account
                             </button>
                         </form>
-
                         <div className="text-center mt-8 text-sm text-gray-500">
                             © 2024 AgriLink. All rights reserved.
                         </div>
