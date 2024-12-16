@@ -21,7 +21,7 @@ const Marketplace = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:5000/products', {
+      const response = await axios.get('https://agrilink-1-870p.onrender.com/products', {
         params: {
           page: currentPage,
           per_page: 12

@@ -13,7 +13,7 @@ function LoginBuyer() {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/login/buyer', {
+      const response = await axios.post('https://agrilink-1-870p.onrender.com/login/buyer', {
         identifier,
         password,
       }, {

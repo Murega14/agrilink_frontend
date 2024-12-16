@@ -35,7 +35,7 @@ const BuyerSignup = () => {
         const { confirm_password, ...submitData} = formData;
 
         try {
-            const response = await axios.post('http;//localhost:5000/signup/buyer', submitData);
+            const response = await axios.post('https://agrilink-1-870p.onrender.com/signup/buyer', submitData);
 
             if (response.data.success) {
                 navigate('/marketplace');
