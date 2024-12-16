@@ -9,7 +9,7 @@ const Hero = () => {
           <aside className="lg:w-1/2">
             <div className="h-full relative rounded-xl overflow-hidden shadow-lg group">
               <img
-                src="https://img.freepik.com/free-vector/farmer-collecting-fresh-natural-organic-vegetable-wood-box-preparation-trade-street-farm-eco-food-market_575670-488.jpg?t=st=1731482613~exp=1731486213~hmac=a1ed87a0c8befd4366afefce3315fa54e612cd51735b8bb42cc627d1ad4ce7c6&w=826"
+                src="https://images.unsplash.com/photo-1498579397066-22750a3cb424?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="Farmer harvesting fresh vegetables"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -151,7 +151,7 @@ const Hero = () => {
           <aside className="lg:w-1/2 order-1 lg:order-2">
             <div className="h-full relative rounded-xl overflow-hidden shadow-lg group">
               <img
-                src="https://img.freepik.com/free-vector/cartoon-farm-landscape_23-2148172836.jpg?t=st=1731482740~exp=1731486340~hmac=db7f1b8da4c992973c6c404069be037f6f6613750867f28ddb69c72f4bdc74eb&w=740"
+                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="Farmer in the field"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
