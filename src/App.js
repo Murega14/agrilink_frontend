@@ -8,6 +8,7 @@ import ForgotPassword from './components/authentication/ForgotPassword';
 import ResetPassword from './components/authentication/ResetPassword';
 import Dashboard from './components/FarmerUI/Dashboard'
 import Marketplace from './components/BuyerUI/Marketplace';
+import AddProduct from './components/FarmerUI/AddProduct';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path='/resetpassword' element={<ResetPassword />} /> 
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/marketplace' element={<Marketplace />} />
+        <Route path='/products/add' element={<AddProduct />} />
       </Routes>
       </Router>
     </>
