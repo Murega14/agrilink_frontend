@@ -31,7 +31,7 @@ const Dashboard = () => {
       {/* Mobile & Tablet Hamburger Button */}
       <button 
         onClick={toggleSidebar} 
-        className="top-2 left-4 z-50 md:hidden bg-green-600 text-white p-2 rounded-lg"
+        className="fixed top-2 left-4 z-50 md:hidden bg-green-600 text-white p-2 rounded-lg"
       >
         {isSidebarOpen ? <X /> : <Menu />}
       </button>
