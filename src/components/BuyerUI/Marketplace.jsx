@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
-import { Filter } from 'lucide-react';
+import { Filter, Search, X } from 'lucide-react';
 import ProductCard from './Productcard';
 import Navbar from './Navbar';
 import { CartContext } from '../context/Cart'
@@ -14,18 +14,22 @@ const Marketplace = () => {
   const [filters, setFilters] = useState({
     category: '',
     minPrice: '',
-    maxPrice: ''
+    maxPrice: '',
+    search: ''
   });
   const { addToCart } = useContext(CartContext) || {};
+  const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
-  const fetchProducts = async (currentPage) => {
+  // Use useCallback to memoize fetchProducts
+  const fetchProducts = useCallback(async (currentPage) => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get('https://agrilink-1-870p.onrender.com/products', {
         params: {
           page: currentPage,
-          per_page: 12
+          per_page: screenWidth < 640 ? 6 : 12
         }
       });
       setProducts(response.data);
@@ -35,7 +39,7 @@ const Marketplace = () => {
       setError('Failed to fetch products. Please try again.');
       setLoading(false);
     }
-  };
+  }, [screenWidth]);
 
   const handleAddToCart = (product) => {
     try {
@@ -56,35 +60,141 @@ const Marketplace = () => {
     }
   };
 
+  // Responsive screen width tracking
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Add dependency for fetchProducts
   useEffect(() => {
     fetchProducts(page);
-  }, [page]);
+  }, [page, fetchProducts]);
 
   const filteredProducts = products.filter(product => {
     const categoryMatch = !filters.category || 
       product.category.toLowerCase() === filters.category.toLowerCase();
     const minPriceMatch = !filters.minPrice || product.price >= parseFloat(filters.minPrice);
     const maxPriceMatch = !filters.maxPrice || product.price <= parseFloat(filters.maxPrice);
-    return categoryMatch && minPriceMatch && maxPriceMatch;
+    const searchMatch = !filters.search || 
+      product.name.toLowerCase().includes(filters.search.toLowerCase());
+    return categoryMatch && minPriceMatch && maxPriceMatch && searchMatch;
   });
+
+  // Mobile Filter Modal
+  const FilterModal = () => (
+    <div 
+      className="fixed inset-0 z-50 bg-white overflow-y-auto animate-slide-up"
+      style={{ 
+        animationDuration: '0.3s',
+        transform: isFilterMobileOpen ? 'translateY(0)' : 'translateY(100%)'
+      }}
+    >
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-green-700">Filter Products</h2>
+          <button 
+            onClick={() => setIsFilterMobileOpen(false)}
+            className="text-red-500"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Search Input */}
+        <div className="mb-4 relative">
+          <input 
+            type="text" 
+            placeholder="Search products..." 
+            className="w-full border rounded-full p-2 pl-10 text-sm"
+            value={filters.search}
+            onChange={(e) => setFilters({...filters, search: e.target.value})}
+          />
+          <Search 
+            className="absolute left-3 top-3 text-gray-400" 
+            size={18} 
+          />
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2 text-sm">Category</label>
+          <select 
+            className="w-full border rounded-md p-2 text-sm"
+            value={filters.category}
+            onChange={(e) => setFilters({...filters, category: e.target.value})}
+          >
+            <option value="">All Categories</option>
+            <option value="Vegetables">Vegetable</option>
+            <option value="Fruits">Fruit</option>
+            <option value="Grains">Grains</option>
+          </select>
+        </div>
+        
+        {/* Price Filters */}
+        <div className="flex flex-col space-y-4">
+          <div>
+            <label className="block text-gray-700 mb-1 text-sm">Min Price</label>
+            <input 
+              type="number" 
+              placeholder="Min Price" 
+              className="w-full border rounded-md p-2 text-sm"
+              value={filters.minPrice}
+              onChange={(e) => setFilters({...filters, minPrice: e.target.value})}
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1 text-sm">Max Price</label>
+            <input 
+              type="number" 
+              placeholder="Max Price" 
+              className="w-full border rounded-md p-2 text-sm"
+              value={filters.maxPrice}
+              onChange={(e) => setFilters({...filters, maxPrice: e.target.value})}
+            />
+          </div>
+        </div>
+
+        {/* Apply Filters Button */}
+        <button 
+          onClick={() => setIsFilterMobileOpen(false)}
+          className="w-full mt-4 bg-green-600 text-white p-2 rounded-full"
+        >
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-green-50">
       <Navbar />
       <ToastContainer />
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex">
-          {/* Filters Section */}
-          <div className="w-1/4 pr-8">
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-xl font-bold mb-4 flex items-center">
-                <Filter className="mr-2 text-green-600" /> Filters
-              </h2>
-              
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2">Category</label>
+      
+      <main className="container mx-auto px-4 py-4 md:py-8">
+        {/* Mobile Filter Trigger */}
+        <div className="md:hidden mb-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold text-green-800">Marketplace</h1>
+          <button 
+            onClick={() => setIsFilterMobileOpen(true)}
+            className="flex items-center bg-green-100 p-2 rounded-full"
+          >
+            <Filter className="text-green-600 mr-2" size={20} />
+            <span className="text-sm">Filters</span>
+          </button>
+        </div>
+
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+          {/* Desktop Filters */}
+          <div className="hidden md:block md:w-1/4 bg-white rounded-lg p-4 shadow-md">
+
+            <h2 className="text-lg font-bold mb-3 text-green-700">Filters</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-2 text-sm">Category</label>
                 <select 
-                  className="w-full border rounded-md p-2"
+                  className="w-full border rounded-md p-2 text-sm"
                   value={filters.category}
                   onChange={(e) => setFilters({...filters, category: e.target.value})}
                 >
@@ -95,18 +205,22 @@ const Marketplace = () => {
                 </select>
               </div>
               
-              <div className="flex space-x-2 mb-4">
+              <div>
+                <label className="block text-gray-700 mb-1 text-sm">Min Price</label>
                 <input 
                   type="number" 
                   placeholder="Min Price" 
-                  className="w-1/2 border rounded-md p-2"
+                  className="w-full border rounded-md p-2 text-sm"
                   value={filters.minPrice}
                   onChange={(e) => setFilters({...filters, minPrice: e.target.value})}
                 />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1 text-sm">Max Price</label>
                 <input 
                   type="number" 
                   placeholder="Max Price" 
-                  className="w-1/2 border rounded-md p-2"
+                  className="w-full border rounded-md p-2 text-sm"
                   value={filters.maxPrice}
                   onChange={(e) => setFilters({...filters, maxPrice: e.target.value})}
                 />
@@ -114,8 +228,8 @@ const Marketplace = () => {
             </div>
           </div>
 
-          {/* Products Grid */}
-          <div className="w-3/4">
+          {/* Products Section */}
+          <div className="w-full md:w-3/4">
             {loading ? (
               <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600"></div>
@@ -124,31 +238,35 @@ const Marketplace = () => {
               <div className="text-red-600 text-center text-xl">
                 {error}
               </div>
-            ) : (
-              <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredProducts.map((product, index) => (
+            ) : filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                {filteredProducts.map((product) => (
                   <ProductCard 
                     key={product.id} 
                     product={product} 
-                    onAddToCart={handleAddToCart}  // Use the new handler
+                    onAddToCart={handleAddToCart}
                   />
                 ))}
               </div>
+            ) : (
+              <div className="text-center text-gray-500 py-10">
+                No products found matching your filters.
+              </div>
             )}
 
-            {/* Pagination Section remains the same */}
-            <div className="flex justify-center mt-8 space-x-4">
+            {/* Pagination */}
+            <div className="flex justify-center mt-6 space-x-4">
               <button 
                 onClick={() => setPage(page - 1)} 
                 disabled={page === 1}
-                className="bg-green-600 text-white px-4 py-2 rounded-full disabled:opacity-50"
+                className="bg-green-600 text-white px-4 py-2 rounded-full disabled:opacity-50 text-sm"
               >
                 Previous
               </button>
-              <span className="text-gray-700 self-center">Page {page}</span>
+              <span className="text-gray-700 self-center text-sm">Page {page}</span>
               <button 
                 onClick={() => setPage(page + 1)}
-                className="bg-green-600 text-white px-4 py-2 rounded-full"
+                className="bg-green-600 text-white px-4 py-2 rounded-full text-sm"
               >
                 Next
               </button>
@@ -157,9 +275,12 @@ const Marketplace = () => {
         </div>
       </main>
 
-      <footer className="bg-green-800 text-white py-6">
+      {/* Mobile Filter Modal */}
+      {isFilterMobileOpen && <FilterModal />}
+
+      <footer className="bg-green-800 text-white py-4 md:py-6">
         <div className="container mx-auto text-center">
-          <p>&copy; 2024 AgriLink - Connecting Farmers to HouseHolds</p>
+          <p className="text-sm md:text-base">&copy; 2024 AgriLink - Connecting Farmers to Households</p>
         </div>
       </footer>
     </div>
