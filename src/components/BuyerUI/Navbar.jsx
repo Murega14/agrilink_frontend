@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/Cart";
 import { ShoppingCart, User, Menu } from "lucide-react";
 
-const Navbar = () => {
+const Navbar = ({ onSearch }) => {
   const navigate = useNavigate();
   const { cartItems } = useContext(CartContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const uniqueItemCount = new Set(cartItems.map(item => item.id)).size;
+  
 
 
   const handleSearchChange = (event) => {
@@ -17,8 +18,11 @@ const Navbar = () => {
 
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
-      console.log("Search Query:", searchQuery);
-      //implementation of search functionality
+      // Always perform search if query is not empty
+      if (onSearch) {
+        onSearch(searchQuery.trim());
+      }
+      navigate('/marketplace');
     }
   };
 
@@ -33,6 +37,12 @@ const Navbar = () => {
   const handleProfileClick = () => {
     navigate('/profile');
   };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-green-800 text-white shadow-lg">
@@ -66,7 +76,7 @@ const Navbar = () => {
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
-                onChange={handleSearchChange}
+                onChange={handleSearchChange} onKeyPress={handleKeyPress}
                 className="w-full p-2 pl-4 pr-12 text-gray-800 border border-green-200 rounded-lg shadow focus:outline-none focus:border-green-400"
               />
               <button

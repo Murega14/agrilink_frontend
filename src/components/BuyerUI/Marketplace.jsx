@@ -11,6 +11,7 @@ const Marketplace = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     category: '',
     minPrice: '',
@@ -20,19 +21,32 @@ const Marketplace = () => {
   const { addToCart } = useContext(CartContext) || {};
   const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
 
   // Use useCallback to memoize fetchProducts
-  const fetchProducts = useCallback(async (currentPage) => {
+  const fetchProducts = useCallback(async (currentPage, query = '') => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get('https://agrilink-1-870p.onrender.com/products', {
         params: {
           page: currentPage,
-          per_page: screenWidth < 640 ? 6 : 12
+          per_page: screenWidth < 640 ? 6 : 12,
+          search: query
         }
       });
-      setProducts(response.data);
+      
+      // Update products based on search
+      if (query) {
+        setSearchResults(response.data);
+        setIsSearching(true);
+      } else {
+        setProducts(response.data);
+        setIsSearching(false);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -40,6 +54,21 @@ const Marketplace = () => {
       setLoading(false);
     }
   }, [screenWidth]);
+
+  const handleGlobalSearch = (query) => {
+    setGlobalSearchQuery(query);
+    setPage(1);
+    fetchProducts(1, query);
+  };
+
+  // Reset search and show all products
+  const handleClearSearch = () => {
+    setGlobalSearchQuery('');
+    setSearchResults([]);
+    setIsSearching(false);
+    fetchProducts(1);
+  };
+
 
   const handleAddToCart = (product) => {
     try {
@@ -69,10 +98,18 @@ const Marketplace = () => {
 
   // Add dependency for fetchProducts
   useEffect(() => {
-    fetchProducts(page);
-  }, [page, fetchProducts]);
+    if (globalSearchQuery) {
+      fetchProducts(page, globalSearchQuery);
+    } else {
+      fetchProducts(page);
+    }
+  }, [page, fetchProducts, globalSearchQuery]);
 
-  const filteredProducts = products.filter(product => {
+   // Determine which products to use for filtering
+  const productsToFilter = isSearching ? searchResults : products;
+
+  // Apply filters to the current set of products
+  const filteredProducts = productsToFilter.filter(product => {
     const categoryMatch = !filters.category || 
       product.category.toLowerCase() === filters.category.toLowerCase();
     const minPriceMatch = !filters.minPrice || product.price >= parseFloat(filters.minPrice);
@@ -91,6 +128,7 @@ const Marketplace = () => {
         transform: isFilterMobileOpen ? 'translateY(0)' : 'translateY(100%)'
       }}
     >
+
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-green-700">Filter Products</h2>
@@ -169,9 +207,21 @@ const Marketplace = () => {
 
   return (
     <div className="min-h-screen bg-green-50">
-      <Navbar />
+      <Navbar onSearch={handleGlobalSearch} />
       <ToastContainer />
-      
+      {isSearching && (
+        <div className="container mx-auto px-4 py-2 flex justify-between items-center bg-green-100">
+          <p className="text-green-800">
+            Search results for "{globalSearchQuery}"
+          </p>
+          <button 
+            onClick={handleClearSearch}
+            className="text-green-700 hover:text-green-900"
+          >
+            Clear Search
+          </button>
+        </div>
+      )}
       <main className="container mx-auto px-4 py-4 md:py-8">
         {/* Mobile Filter Trigger */}
         <div className="md:hidden mb-4 flex justify-between items-center">

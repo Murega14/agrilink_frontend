@@ -45,7 +45,6 @@ const ProductCard = ({ product }) => {
         {/* Price and Category */}
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center space-x-2">
-            <Leaf className="text-green-500" size={20} />
             <span className="text-sm text-gray-700 font-medium">{product.category}</span>
           </div>
           <span className="text-green-700 font-bold text-lg">Ksh {product.price}</span>
