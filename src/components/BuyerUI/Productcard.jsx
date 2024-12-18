@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ShoppingCart, Leaf, Star } from 'lucide-react';
+import { CartContext } from '../context/Cart';
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({ product }) => {
+  // Use the CartContext to access addToCart method
+  const { addToCart } = useContext(CartContext);
+
   // Fallback image placeholder
   const getProductImage = () => {
     const placeholderImages = {
@@ -44,7 +48,7 @@ const ProductCard = ({ product, onAddToCart }) => {
             <Leaf className="text-green-500" size={20} />
             <span className="text-sm text-gray-700 font-medium">{product.category}</span>
           </div>
-          <span className="text-green-700 font-bold text-lg">${product.price.toFixed(2)}</span>
+          <span className="text-green-700 font-bold text-lg">Ksh {product.price}</span>
         </div>
 
         {/* Description */}
@@ -60,14 +64,14 @@ const ProductCard = ({ product, onAddToCart }) => {
           <div className="text-sm text-gray-600 flex items-center">
             <span className="mr-2">Stock:</span>
             <span className={`font-semibold ${product.amount <= 10 ? 'text-yellow-600' : 'text-green-600'}`}>
-              {product.amount} units
+              {product.amount} Kgs
             </span>
           </div>
         </div>
 
         {/* Add to Cart Button */}
         <button 
-          onClick={() => onAddToCart(product)}
+          onClick={() => addToCart(product)}
           disabled={product.amount === 0}
           className="w-full bg-green-600 text-white py-2 rounded-full hover:bg-green-700 transition-colors flex items-center justify-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >

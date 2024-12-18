@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import {  Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import ProductCard from './Productcard';
-import Navbar from'./Navbar';
+import Navbar from './Navbar';
+import { CartContext } from '../context/Cart'
+import { ToastContainer, toast } from 'react-toastify';
 
-// Main Marketplace Component
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,6 +16,7 @@ const Marketplace = () => {
     minPrice: '',
     maxPrice: ''
   });
+  const { addToCart } = useContext(CartContext) || {};
 
   const fetchProducts = async (currentPage) => {
     setLoading(true);
@@ -36,17 +37,28 @@ const Marketplace = () => {
     }
   };
 
+  const handleAddToCart = (product) => {
+    try {
+      addToCart(product);
+      toast.success(`${product.name} added to cart!`, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+      });
+    } catch (error) {
+      toast.error('Failed to add product to cart', {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    }
+  };
+
   useEffect(() => {
     fetchProducts(page);
   }, [page]);
-
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-  };
-
-  const removeFromCart = (productToRemove) => {
-    setCart(cart.filter(product => product.name !== productToRemove.name));
-  };
 
   const filteredProducts = products.filter(product => {
     const categoryMatch = !filters.category || 
@@ -59,11 +71,10 @@ const Marketplace = () => {
   return (
     <div className="min-h-screen bg-green-50">
       <Navbar />
-
-      {/* Main Content */}
+      <ToastContainer />
       <main className="container mx-auto px-4 py-8">
         <div className="flex">
-          {/* Filters */}
+          {/* Filters Section */}
           <div className="w-1/4 pr-8">
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-xl font-bold mb-4 flex items-center">
@@ -117,15 +128,15 @@ const Marketplace = () => {
               <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredProducts.map((product, index) => (
                   <ProductCard 
-                    key={index} 
+                    key={product.id} 
                     product={product} 
-                    onAddToCart={addToCart} 
+                    onAddToCart={handleAddToCart}  // Use the new handler
                   />
                 ))}
               </div>
             )}
 
-            {/* Pagination */}
+            {/* Pagination Section remains the same */}
             <div className="flex justify-center mt-8 space-x-4">
               <button 
                 onClick={() => setPage(page - 1)} 
@@ -146,7 +157,6 @@ const Marketplace = () => {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-green-800 text-white py-6">
         <div className="container mx-auto text-center">
           <p>&copy; 2024 AgriLink - Connecting Farmers to HouseHolds</p>

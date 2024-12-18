@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CartContext } from "../context/Cart";
+import { ShoppingCart, User, Menu } from "lucide-react";
 
 const Navbar = () => {
-  const [cartCount, setCartCount] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const { cartItems } = useContext(CartContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const uniqueItemCount = new Set(cartItems.map(item => item.id)).size;
 
-  const handleCartClick = () => {
-    setCartCount(cartCount + 1);
-  };
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -16,6 +18,7 @@ const Navbar = () => {
   const handleSearchSubmit = () => {
     if (searchQuery.trim()) {
       console.log("Search Query:", searchQuery);
+      //implementation of search functionality
     }
   };
 
@@ -23,12 +26,23 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleCartClick = () => {
+    navigate('/cart');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-green-800 text-white shadow-lg">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo and Brand */}
-          <div className="flex items-center space-x-3">
+          <div 
+            className="flex items-center space-x-3 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
             <svg
               className="w-8 h-8 text-green-300"
               fill="none"
@@ -81,20 +95,9 @@ const Navbar = () => {
             <button 
               className="hover:text-green-200 transition-colors duration-200 hidden md:block"
               aria-label="User Profile"
+              onClick={handleProfileClick}
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
+              <User className="w-6 h-6" />
             </button>
 
             <button
@@ -102,25 +105,14 @@ const Navbar = () => {
               onClick={handleCartClick}
               aria-label="Shopping Cart"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              {cartCount > 0 && (
+              <ShoppingCart className="w-6 h-6" />
+              {uniqueItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartCount}
+                  {uniqueItemCount}
                 </span>
               )}
             </button>
+
 
             {/* Mobile Menu Toggle */}
             <button 
@@ -128,19 +120,7 @@ const Navbar = () => {
               onClick={toggleMobileMenu}
               aria-label="Toggle Mobile Menu"
             >
-              <svg 
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Menu className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -151,11 +131,17 @@ const Navbar = () => {
         <div className="md:hidden bg-green-700 py-4">
           <div className="container mx-auto px-4">
             <div className="flex flex-col space-y-2">
-              <button className="text-left py-2 hover:bg-green-600 transition-colors">
+              <button 
+                className="text-left py-2 hover:bg-green-600 transition-colors"
+                onClick={handleProfileClick}
+              >
                 Profile
               </button>
-              <button className="text-left py-2 hover:bg-green-600 transition-colors">
-                Cart
+              <button 
+                className="text-left py-2 hover:bg-green-600 transition-colors"
+                onClick={handleCartClick}
+              >
+                Cart ({cartItems.reduce((total, item) => total + item.quantity, 0)})
               </button>
             </div>
           </div>
