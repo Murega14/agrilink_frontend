@@ -35,7 +35,7 @@ const Navbar = ({ onSearch }) => {
   };
 
   const handleProfileClick = () => {
-    navigate('/profile');
+    navigate('/user');
   };
 
   const handleKeyPress = (event) => {

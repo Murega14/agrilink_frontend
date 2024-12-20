@@ -14,6 +14,7 @@ import Dashboard from './components/FarmerUI/Dashboard'
 import Marketplace from './components/BuyerUI/Marketplace';
 import AddProduct from './components/FarmerUI/AddProduct';
 import Cart from './components/BuyerUI/Cart';
+import UserProfile from './components/BuyerUI/UserProfile';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path='/marketplace' element={<Marketplace />} />
           <Route path='/products/add' element={<AddProduct />} />
           <Route path='/cart' element={<Cart />} />
+          <Route path='/user' element={<UserProfile />} />
         </Routes>
         <ToastContainer />
       </Router>
