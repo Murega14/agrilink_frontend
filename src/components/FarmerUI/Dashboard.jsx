@@ -42,7 +42,7 @@ const Dashboard = () => {
         // fetch all the products in parrarel
         const [summaryRes, ordersRes, productsRes] = await Promise.all([
           axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/stats'),
-          axios.get('https://agrilink-1-870p.onrender.com/api/recent-orders'),
+          axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/recent-orders'),
           axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/available-products')
 
         ]);
