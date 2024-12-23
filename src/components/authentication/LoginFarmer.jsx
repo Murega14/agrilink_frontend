@@ -13,7 +13,7 @@ function LoginFarmer() {
     setError('');
 
     try {
-      const response = await axios.post('https://agrilink-1-870p.onrender.com/login/farmer', {
+      const response = await axios.post('https://agrilink-1-870p.onrender.com/api/v1/login/farmer', {
         identifier,
         password,
       }, {

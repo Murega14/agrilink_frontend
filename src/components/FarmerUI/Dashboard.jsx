@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   LayoutDashboard, 
   ShoppingCart, 
@@ -9,6 +9,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import axios from "axios";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,6 +26,53 @@ const Dashboard = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  const [dashboardData, setDashboardData] = useState({
+    stats: null,
+    recentOrders:[],
+    availableProducts: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+
+        // fetch all the products in parrarel
+        const [summaryRes, ordersRes, productsRes] = await Promise.all([
+          axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/stats'),
+          axios.get('https://agrilink-1-870p.onrender.com/api/recent-orders'),
+          axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/available-products')
+
+        ]);
+
+        const [summaryData, ordersData, productsData] = await Promise.all([
+          summaryRes.json(),
+          ordersRes.json(),
+          productsRes.json()
+        ]);
+
+        setDashboardData({
+          stats: summaryData.dashboard_stats,
+          recentOrders: ordersData.recent_orders,
+          availableProducts: productsData.available_products
+        });
+      } catch (err) {
+        setError('Failed to load Dashboard Data');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!dashboardData.stats) return <div>No Data</div>;
+
 
   return (
     <div className="flex">
@@ -93,7 +141,7 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Remaining existing dashboard content from the original file */}
+        
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           {/* Products Sold */}
           <div className="bg-white rounded-lg p-4 shadow">
@@ -112,10 +160,11 @@ const Dashboard = () => {
                   </svg>
                 </div>
                 <p className="text-gray-600">Products Sold</p>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">{dashboardData.stats.products_sold.value}</p>
               </div>
               <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
-                +0% vs LM
+              {dashboardData.stats.products_sold.change > 0 ? '+' : ''}
+                {dashboardData.stats.products_sold.change}% vs LM
               </span>
             </div>
           </div>
@@ -136,11 +185,11 @@ const Dashboard = () => {
                 </svg>
               </div>
               <p className="text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold">Ksh 0</p>
+              <p className="text-2xl font-bold">Ksh {dashboardData.stats.current_month_value.value}</p>
             </div>
             <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
-              +0% vs LM
-            </span>
+            {dashboardData.stats.current_month_value.change > 0 ? '+' : ''}
+            {dashboardData.stats.current_month_value.change}% vs LM            </span>
           </div>
         </div>
 
@@ -161,7 +210,7 @@ const Dashboard = () => {
                 </svg>
               </div>
               <p className="text-gray-600">Pending Orders</p>
-              <p className="text-2xl font-bold">0</p>
+              <p className="text-2xl font-bold">{dashboardData.stats.pending_orders.value}</p>
             </div>
             <span className="bg-amber-100 text-amber-600 px-2 py-1 rounded text-sm">
               Action Needed
@@ -186,7 +235,7 @@ const Dashboard = () => {
                 </svg>
               </div>
               <p className="text-gray-600">Active Listings</p>
-              <p className="text-2xl font-bold">5</p>
+              <p className="text-2xl font-bold">{dashboardData.stats.active_listings.value}</p>
             </div>
             <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">
               In Stock
@@ -196,25 +245,25 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Orders and Available Products */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Recent Orders */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Recent Orders</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b pb-2">
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4">Recent Orders</h2>
+        <div className="space-y-4">
+          {dashboardData.recentOrders.map((order, index) => (
+            <div key={index} className="flex items-center justify-between border-b pb-2">
               <div>
-                <p className="font-medium">Order #12345</p>
-                <p className="text-sm text-gray-600">2 hours ago</p>
+                <p className="font-medium">{order.order_number}</p>
+                <p className="text-sm text-gray-600">{order.time_ago}</p>
               </div>
               <div className="text-right">
-                <p className="font-medium">Ksh 123.45</p>
+                <p className="font-medium">{order.currency} {order.amount}</p>
                 <span className="inline-block px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
-                  Processing
+                  {order.status}
                 </span>
               </div>
             </div>
-          </div>
+          ))}
         </div>
+      </div>
 
         {/* Available Products */}
         <div className="bg-white p-4 rounded-lg shadow">
@@ -225,20 +274,21 @@ const Dashboard = () => {
             </button>
           </div>
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b pb-2">
-              <div>
-                <p className="font-medium">Organic Product</p>
-                <p className="text-sm text-gray-600">Stock: 50 kg</p>
+            {dashboardData.availableProducts.map((product, index) => (
+              <div key={index} className="flex items-center justify-between border-b pb-2">
+                <div>
+                  <p className="font-medium">{product.name}</p>
+                  <p className="text-sm text-gray-600">Stock: {product.amount} kg</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">Ksh {product.price}/kg</p>
+                  <button className="text-sm text-blue-600 hover:text-blue-700">
+                    Edit
+                  </button>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-medium">Ksh 50/kg</p>
-                <button className="text-sm text-blue-600 hover:text-blue-700">
-                  Edit
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
         </div>
       </div>
     </div>

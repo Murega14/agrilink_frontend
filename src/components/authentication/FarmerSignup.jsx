@@ -34,7 +34,7 @@ const FarmerSignup = () => {
         const { confirm_password, ...submitDate} = formData;
 
         try {
-            const response = await axios.post('https://agrilink-1-870p.onrender.com/signup/farmer', submitDate);
+            const response = await axios.post('https://agrilink-1-870p.onrender.com/api/v1/signup/farmer', submitDate);
 
             if (response.data.success) {
                 navigate('/dashboard');
