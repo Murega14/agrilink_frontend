@@ -10,9 +10,22 @@ import {
   X
 } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [dashboardData, setDashboardData] = useState({
+    stats: {
+      products_sold: { value: 0, change: 0 },
+      current_month_value: { value: 0, change: 0 },
+      pending_orders: { value: 0 },
+      active_listings: { value: 0 }
+    },
+    recentOrders: [],
+    availableProducts: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const navItems = [
     { icon: LayoutDashboard, label: "Analytics", href: "/analytics" },
@@ -20,75 +33,124 @@ const Dashboard = () => {
     { icon: CreditCard, label: "Payments", href: "/payments" },
     { icon: Box, label: "Products", href: "/products" },
     { icon: Mail, label: "Newsletter", href: "/newsletter" },
-    { icon: Scale, label: "Laws Explainer", href: "/laws" }
+    { icon: Scale, label: "Laws Explainer", href: "/laws" },
   ];
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  const [dashboardData, setDashboardData] = useState({
-    stats: null,
-    recentOrders:[],
-    availableProducts: []
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        navigate('/login/farmer');
+        return;
+      }
+    
+      const axiosInstance = axios.create({
+        baseURL: 'https://agrilink-1-870p.onrender.com',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': `application/json`,
+        },
+        withCredentials: true
+      });
+    
       try {
         setLoading(true);
-
-        // fetch all the products in parrarel
-        const [summaryRes, ordersRes, productsRes] = await Promise.all([
-          axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/stats'),
-          axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/recent-orders'),
-          axios.get('https://agrilink-1-870p.onrender.com/api/dashboard/available-products')
-
-        ]);
-
-        const [summaryData, ordersData, productsData] = await Promise.all([
-          summaryRes.json(),
-          ordersRes.json(),
-          productsRes.json()
-        ]);
-
-        setDashboardData({
-          stats: summaryData.dashboard_stats,
-          recentOrders: ordersData.recent_orders,
-          availableProducts: productsData.available_products
-        });
+        setError(null);
+    
+        let newDashboardData = {
+          stats: {
+            products_sold: { value: 0, change: 0 },
+            current_month_value: { value: 0, change: 0 },
+            pending_orders: { value: 0 },
+            active_listings: { value: 0 }
+          },
+          recentOrders: [],
+          availableProducts: []
+        };
+    
+        // Fetch stats
+        try {
+          const statsRes = await axiosInstance.get("/api/dashboard/stats");
+          newDashboardData.stats = {
+            products_sold: { 
+              value: statsRes.data.products_sold,
+              change: 0 // You might want to calculate this based on previous data
+            },
+            current_month_value: { 
+              value: statsRes.data.current_month_revenue,
+              change: 0 // You might want to calculate this based on previous data
+            },
+            pending_orders: { 
+              value: statsRes.data.pending_orders 
+            },
+            active_listings: { 
+              value: statsRes.data.active_listings 
+            }
+          };
+        } catch (error) {
+          console.error("Stats fetch error:", error.response?.data || error.message);
+        }
+    
+        // Fetch orders
+        try {
+          const ordersRes = await axiosInstance.get("/api/dashboard/recent-orders");
+          newDashboardData.recentOrders = ordersRes.data;
+        } catch (error) {
+          console.error("Orders fetch error:", error.response?.data || error.message);
+        }
+    
+        // Fetch products
+        try {
+          const productsRes = await axiosInstance.get("/api/dashboard/available-products");
+          newDashboardData.availableProducts = productsRes.data;
+        } catch (error) {
+          console.error("Products fetch error:", error.response?.data || error.message);
+        }
+    
+        // Update state with all the fetched data
+        setDashboardData(newDashboardData);
+    
       } catch (err) {
-        setError('Failed to load Dashboard Data');
-        console.error(err);
+        console.error("Dashboard data fetch error:", {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login/farmer');
+        } else {
+          setError(err.response?.data?.message || "Failed to load dashboard data");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [navigate]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!dashboardData.stats) return <div>No Data</div>;
+  if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  if (error) return <div className="text-red-500 p-4">{error}</div>;
 
+  const { stats, recentOrders, availableProducts } = dashboardData;
 
   return (
     <div className="flex">
-      {/* Mobile & Tablet Hamburger Button */}
       <button 
-        onClick={toggleSidebar} 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
         className="fixed top-2 left-4 z-50 md:hidden bg-green-600 text-white p-2 rounded-lg"
       >
         {isSidebarOpen ? <X /> : <Menu />}
       </button>
 
-      {/* Sidebar Navigation */}
       <div className={`
         fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transition-transform duration-300
         md:relative md:translate-x-0
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}>
         <div className="p-4 border-b">
           <h1 className="text-2xl font-bold text-green-600">AgriLink</h1>
@@ -114,185 +176,95 @@ const Dashboard = () => {
         </nav>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 bg-slate-50 p-6 min-h-screen">
         {isSidebarOpen && (
           <div 
-            onClick={toggleSidebar} 
+            onClick={() => setIsSidebarOpen(false)} 
             className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
           />
         )}
 
-        {/* Existing Dashboard Content */}
-        {/* Add Product Button */}
-        <div className="flex justify-end mb-6">
-          <button className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M12 4v16m8-8H4"></path>
-            </svg>
-            <a href="/products/add">Add New Product</a>
-          </button>
-        </div>
-
-        
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          {/* Products Sold */}
-          <div className="bg-white rounded-lg p-4 shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center text-green-600 mb-2">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M20 6H4m16 0a2 2 0 012 2v8a2 2 0 01-2 2m0-12a2 2 0 00-2-2M4 6a2 2 0 00-2 2v8a2 2 0 002 2m0 0a2 2 0 002-2m12 0a2 2 0 002-2m-16 0a2 2 0 002-2m12 0a2 2 0 00-2-2"></path>
-                  </svg>
-                </div>
-                <p className="text-gray-600">Products Sold</p>
-                <p className="text-2xl font-bold">{dashboardData.stats.products_sold.value}</p>
-              </div>
-              <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
-              {dashboardData.stats.products_sold.change > 0 ? '+' : ''}
-                {dashboardData.stats.products_sold.change}% vs LM
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center text-green-600 mb-2">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M3 3h18v6H3zm0 6h18v6H3zm0 6h18v6H3z"></path>
-                </svg>
-              </div>
-              <p className="text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold">Ksh {dashboardData.stats.current_month_value.value}</p>
-            </div>
-            <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
-            {dashboardData.stats.current_month_value.change > 0 ? '+' : ''}
-            {dashboardData.stats.current_month_value.change}% vs LM            </span>
-          </div>
+          <StatCard 
+            title="Products Sold"
+            value={stats.products_sold.value}
+            change={stats.products_sold.change}
+            changeLabel="vs LM"
+            icon="📦"
+          />
+          <StatCard 
+            title="Total Revenue"
+            value={`Ksh ${stats.current_month_value.value}`}
+            change={stats.current_month_value.change}
+            changeLabel="vs LM"
+            icon="💰"
+          />
+          <StatCard 
+            title="Pending Orders"
+            value={stats.pending_orders.value}
+            change="Action Needed"
+            icon="📥"
+          />
+          <StatCard 
+            title="Active Listings"
+            value={stats.active_listings.value}
+            change="In Stock"
+            icon="📑"
+          />
         </div>
 
-        {/* Pending Orders */}
-        <div className="bg-white rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center text-amber-600 mb-2">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M12 4v16m8-8H4"></path>
-                </svg>
-              </div>
-              <p className="text-gray-600">Pending Orders</p>
-              <p className="text-2xl font-bold">{dashboardData.stats.pending_orders.value}</p>
-            </div>
-            <span className="bg-amber-100 text-amber-600 px-2 py-1 rounded text-sm">
-              Action Needed
-            </span>
-          </div>
-        </div>
-
-        {/* Active Listings */}
-        <div className="bg-white rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center text-blue-600 mb-2">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M3 3h18v6H3zm0 6h18v6H3zm0 6h18v6H3z"></path>
-                </svg>
-              </div>
-              <p className="text-gray-600">Active Listings</p>
-              <p className="text-2xl font-bold">{dashboardData.stats.active_listings.value}</p>
-            </div>
-            <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">
-              In Stock
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Orders and Available Products */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Recent Orders</h2>
-        <div className="space-y-4">
-          {dashboardData.recentOrders.map((order, index) => (
-            <div key={index} className="flex items-center justify-between border-b pb-2">
-              <div>
-                <p className="font-medium">{order.order_number}</p>
-                <p className="text-sm text-gray-600">{order.time_ago}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-medium">{order.currency} {order.amount}</p>
-                <span className="inline-block px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
-                  {order.status}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-        {/* Available Products */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Available Products</h2>
-            <button className="text-sm text-green-600 hover:text-green-700">
-              View All
-            </button>
-          </div>
-          <div className="space-y-4">
-            {dashboardData.availableProducts.map((product, index) => (
-              <div key={index} className="flex items-center justify-between border-b pb-2">
-                <div>
-                  <p className="font-medium">{product.name}</p>
-                  <p className="text-sm text-gray-600">Stock: {product.amount} kg</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">Ksh {product.price}/kg</p>
-                  <button className="text-sm text-blue-600 hover:text-blue-700">
-                    Edit
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <DataList title="Recent Orders" items={recentOrders} type="order" />
+        <DataList title="Available Products" items={availableProducts} type="product" />
       </div>
     </div>
   );
 };
+
+const StatCard = ({ title, value, change, changeLabel, icon }) => (
+  <div className="bg-white rounded-lg p-4 shadow">
+    <div className="flex items-center justify-between">
+      <div>
+        <div className="flex items-center text-green-600 mb-2">
+          {icon}
+        </div>
+        <p className="text-gray-600">{title}</p>
+        <p className="text-2xl font-bold">{value}</p>
+      </div>
+      <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">
+        {change} {changeLabel}
+      </span>
+    </div>
+  </div>
+);
+
+const DataList = ({ title, items, type }) => (
+  <div className="bg-white p-4 rounded-lg shadow">
+    <h2 className="text-lg font-semibold mb-4">{title}</h2>
+    <div className="space-y-4">
+      {items.length === 0 ? (
+        <p className="text-gray-500">No data available.</p>
+      ) : (
+        items.map((item, index) => (
+          <div key={index} className="flex items-center justify-between border-b pb-2">
+            <div>
+              <p className="font-medium">{type === "order" ? item.order_number : item.name}</p>
+              <p className="text-sm text-gray-600">
+                {type === "order" ? item.time_ago : `Stock: ${item.amount_available} kg`}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="font-medium">
+                {type === "order" ? `${item.currency} ${item.amount_available}` : `Ksh ${item.price_per_unit}/kg`}
+              </p>
+              {type === "product" && (
+                <button className="text-sm text-blue-600 hover:text-blue-700">Edit</button>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+);
 
 export default Dashboard;
