@@ -76,11 +76,11 @@ const Dashboard = () => {
           newDashboardData.stats = {
             products_sold: { 
               value: statsRes.data.products_sold,
-              change: 0 // You might want to calculate this based on previous data
+              change: 0
             },
             current_month_value: { 
               value: statsRes.data.current_month_revenue,
-              change: 0 // You might want to calculate this based on previous data
+              change: 0
             },
             pending_orders: { 
               value: statsRes.data.pending_orders 
@@ -109,7 +109,6 @@ const Dashboard = () => {
           console.error("Products fetch error:", error.response?.data || error.message);
         }
     
-        // Update state with all the fetched data
         setDashboardData(newDashboardData);
     
       } catch (err) {
@@ -213,8 +212,10 @@ const Dashboard = () => {
           />
         </div>
 
-        <DataList title="Recent Orders" items={recentOrders} type="order" />
-        <DataList title="Available Products" items={availableProducts} type="product" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DataList title="Recent Orders" items={recentOrders} type="order" />
+          <DataList title="Available Products" items={availableProducts} type="product" />
+        </div>
       </div>
     </div>
   );
@@ -238,7 +239,7 @@ const StatCard = ({ title, value, change, changeLabel, icon }) => (
 );
 
 const DataList = ({ title, items, type }) => (
-  <div className="bg-white p-4 rounded-lg shadow">
+  <div className="bg-white p-4 rounded-lg shadow h-full">
     <h2 className="text-lg font-semibold mb-4">{title}</h2>
     <div className="space-y-4">
       {items.length === 0 ? (
