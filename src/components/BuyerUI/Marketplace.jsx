@@ -111,7 +111,7 @@ const Marketplace = () => {
   // Apply filters to the current set of products
   const filteredProducts = productsToFilter.filter(product => {
     const categoryMatch = !filters.category || 
-      product.category.toLowerCase() === filters.category.toLowerCase();
+      product.category === filters.category;
     const minPriceMatch = !filters.minPrice || product.price >= parseFloat(filters.minPrice);
     const maxPriceMatch = !filters.maxPrice || product.price <= parseFloat(filters.maxPrice);
     const searchMatch = !filters.search || 
@@ -166,7 +166,7 @@ const Marketplace = () => {
             <option value="">All Categories</option>
             <option value="Vegetables">Vegetable</option>
             <option value="Fruits">Fruit</option>
-            <option value="Grains">Grains</option>
+            <option value="Grains">Grain</option>
           </select>
         </div>
         

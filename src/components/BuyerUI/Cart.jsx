@@ -18,9 +18,10 @@ const Cart = () => {
   // Placeholder image function
   const getProductImage = (product) => {
     const placeholderImages = {
-      'Vegetables': '/api/placeholder/400/300?text=Vegetables',
-      'Fruits': '/api/placeholder/400/300?text=Fruits',
-      'Grains': '/api/placeholder/400/300?text=Grains'
+      'Vegetable': 'https://www.healthyeating.org/images/default-source/home-0.0/nutrition-topics-2.0/general-nutrition-wellness/2-2-2-2foodgroups_vegetables_detailfeature_thumb.jpg?sfvrsn=aa2422a6_4',
+      'Fruit': 'https://static.vecteezy.com/system/resources/previews/024/174/781/non_2x/juicy-fruits-top-view-background-ai-generative-photo.jpg',
+      'Grain': 'https://swolverine.com/cdn/shop/articles/What_Are_Whole_Grains_And_Why_Are_They_Important_-_Swolverine_1024x.jpg?v=1600716204',
+      'Nuts': `https://www.ofi.com/content/dam/olamofi/products-and-ingredients/nuts/nuts-images/nuts-banner-img.webp`
     };
     return placeholderImages[product.category] || '/api/placeholder/400/300?text=Product';
   };
@@ -41,21 +42,21 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="w-full bg-green-50 py-4 shadow-sm">
-    <div className="container mx-auto flex items-center">
-      <Link 
-        to="/marketplace" 
-        className="flex items-center text-green-900 hover:text-green-700 transition-colors duration-300 group"
-        aria-label="Continue Shopping"
-      >
-        <ShoppingCart 
-          className="mr-3 text-green-600 group-hover:text-green-500 transition-colors duration-300" 
-          size={36} 
-        />
-        <h1 className="text-2xl font-bold">Continue Shopping</h1>
-      </Link>
-    </div>
+    <div className="container mx-auto px-4 py-8 m-2">
+      <header className="w-full py-4 shadow-sm">
+        <div className="container mx-auto flex items-center">
+          <Link 
+            to="/marketplace" 
+            className="flex items-center text-green-900 hover:text-green-700 transition-colors duration-300 group"
+            aria-label="Continue Shopping"
+          >
+            <ShoppingCart 
+              className="mr-3 text-green-600 group-hover:text-green-500 transition-colors duration-300" 
+              size={36} 
+            />
+            <h1 className="text-2xl font-bold">Continue Shopping</h1>
+          </Link>
+        </div>
     </header>
       <div className="grid md:grid-cols-3 gap-6">
         {/* Cart Items Column */}
@@ -73,7 +74,7 @@ const Cart = () => {
               
               <div className="flex-grow">
                 <h3 className="text-lg font-bold text-green-900">{item.name}</h3>
-                <p className="text-green-700">Ksh {item.price.toFixed(2)}</p>
+                <p className="text-green-700">Ksh {item.price}</p>
               </div>
               
               <div className="flex items-center space-x-3">
