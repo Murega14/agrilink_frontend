@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { X } from 'lucide-react';
 
-const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
+const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price_per_unit: '',
-    amount_available: '',
-    category: ''
+    name: product.name,
+    description: product.description || '',
+    price_per_unit: product.price_per_unit,
+    amount_available: product.amount_available,
+    category: product.category || ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,8 +28,8 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        'https://agrilink-1-870p.onrender.com/api/v1/products/add',
+      const response = await axios.put(
+        `https://agrilink-1-870p.onrender.com/api/v1/products/update/{product.id}`,
         formData,
         {
           headers: {
@@ -40,19 +40,12 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
         }
       );
 
-      if (response.status === 201) {
-        onProductAdded(response.data);
+      if (response.status === 200) {
+        onProductUpdate(response.data.product);
         onClose();
-        setFormData({
-          name: '',
-          description: '',
-          price_per_unit: '',
-          amount_available: '',
-          category: ''
-        });
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to add product');
+      setError(err.response?.data?.error || 'Failed to update product');
     } finally {
       setLoading(false);
     }
@@ -67,7 +60,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
         
         <div className="relative bg-white rounded-lg w-full max-w-md p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Add New Product</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Edit Product</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -168,7 +161,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
                 disabled={loading}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50"
               >
-                {loading ? 'Adding...' : 'Add Product'}
+                {loading ? 'Updating...' : 'Update Product'}
               </button>
             </div>
           </form>
@@ -178,4 +171,4 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
   );
 };
 
-export default AddProductModal;
+export default EditProduct;

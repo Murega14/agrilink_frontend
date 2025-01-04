@@ -7,13 +7,17 @@ import {
   Mail, 
   Scale,
   Menu,
-  X
+  X,
+  Plus
 } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import EditProduct from './EditProduct';
+import AddProductModal from  './AddProduct';
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     stats: {
       products_sold: { value: 0, change: 0 },
@@ -37,6 +41,26 @@ const Dashboard = () => {
   ];
   const navigate = useNavigate();
 
+  const handleProductUpdate = (updatedProduct) => {
+    setDashboardData(prev => ({
+      ...prev,
+      availableProducts: prev.availableProducts.map(product =>
+        product.id === updatedProduct.id ? updatedProduct : product
+      )
+    }));
+  };
+
+  const handleProductAdded = (newProduct) => {
+    setDashboardData(prev => ({
+      ...prev,
+      availableProducts: [...prev.availableProducts, newProduct],
+      stats: {
+        ...prev.stats,
+        active_listings: { value: prev.stats.active_listings.value + 1 }
+      }
+    }));
+  };
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       const token = localStorage.getItem('token');
@@ -50,7 +74,7 @@ const Dashboard = () => {
         baseURL: 'https://agrilink-1-870p.onrender.com',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': `application/json`,
+          'Content-Type': 'application/json',
         },
         withCredentials: true
       });
@@ -214,8 +238,31 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <DataList title="Recent Orders" items={recentOrders} type="order" />
-          <DataList title="Available Products" items={availableProducts} type="product" />
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Available Products</h2>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Product
+              </button>
+            </div>
+            <DataList 
+              title="Available Products" 
+              items={availableProducts} 
+              type="product" 
+              onItemsUpdate={handleProductUpdate}
+            />
+          </div>
         </div>
+
+        <AddProductModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onProductAdded={handleProductAdded}
+        />
       </div>
     </div>
   );
@@ -238,34 +285,65 @@ const StatCard = ({ title, value, change, changeLabel, icon }) => (
   </div>
 );
 
-const DataList = ({ title, items, type }) => (
-  <div className="bg-white p-4 rounded-lg shadow h-full">
-    <h2 className="text-lg font-semibold mb-4">{title}</h2>
-    <div className="space-y-4">
-      {items.length === 0 ? (
-        <p className="text-gray-500">No data available.</p>
-      ) : (
-        items.map((item, index) => (
-          <div key={index} className="flex items-center justify-between border-b pb-2">
-            <div>
-              <p className="font-medium">{type === "order" ? item.order_number : item.name}</p>
-              <p className="text-sm text-gray-600">
-                {type === "order" ? item.time_ago : `Stock: ${item.amount_available} kg`}
-              </p>
+const DataList = ({ title, items, type, onItemsUpdate }) => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleProductUpdate = (updatedProduct) => {
+    const updatedItems = items.map(item => 
+      item.id === updatedProduct.id ? updatedProduct : item
+    );
+    onItemsUpdate(updatedItems);
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow h-full">
+      <div className="space-y-4">
+        {items.length === 0 ? (
+          <p className="text-gray-500">No data available.</p>
+        ) : (
+          items.map((item, index) => (
+            <div key={index} className="flex items-center justify-between border-b pb-2">
+              <div>
+                <p className="font-medium">{type === "order" ? item.order_number : item.name}</p>
+                <p className="text-sm text-gray-600">
+                  {type === "order" ? item.time_ago : `Stock: ${item.amount_available} kg`}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">
+                  {type === "order" ? `${item.currency} ${item.amount_available}` : `Ksh ${item.price_per_unit}/kg`}
+                </p>
+                {type === "product" && (
+                  <button 
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                    onClick={() => {
+                      setSelectedProduct(item);
+                      setIsEditModalOpen(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="text-right">
-              <p className="font-medium">
-                {type === "order" ? `${item.currency} ${item.amount_available}` : `Ksh ${item.price_per_unit}/kg`}
-              </p>
-              {type === "product" && (
-                <button className="text-sm text-blue-600 hover:text-blue-700">Edit</button>
-              )}
-            </div>
-          </div>
-        ))
+          ))
+        )}
+      </div>
+
+      {selectedProduct && (
+        <EditProduct
+          product={selectedProduct}
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedProduct(null);
+          }}
+          onProductUpdate={handleProductUpdate}
+        />
       )}
     </div>
-  </div>
-);
+  );
+};
 
 export default Dashboard;
