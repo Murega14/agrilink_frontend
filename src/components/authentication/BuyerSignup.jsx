@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../utils/Axios';
 import { useNavigate } from 'react-router-dom';
 
 const BuyerSignup = () => {
@@ -35,7 +35,7 @@ const BuyerSignup = () => {
         const { confirm_password, ...submitData} = formData;
 
         try {
-            const response = await axios.post('https://agrilink-1-870p.onrender.com/api/v1/signup/buyer', submitData);
+            const response = await axiosInstance.post('/api/v1/signup/buyer', submitData);
 
             if (response.data.success) {
                 navigate('/marketplace');

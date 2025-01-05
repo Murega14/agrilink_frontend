@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../utils/Axios';
 import { X } from 'lucide-react';
 
 const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
@@ -27,17 +27,9 @@ const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.put(
-        `https://agrilink-1-870p.onrender.com/api/v1/products/update/{product.id}`,
+      const response = await axiosInstance.put(
+        `api/v1/products/update/{product.id}`,
         formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        }
       );
 
       if (response.status === 200) {
@@ -99,7 +91,6 @@ const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
                 value={formData.description}
                 onChange={handleChange}
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-green-500 h-24"
-                required
               />
             </div>
 

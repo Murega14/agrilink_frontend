@@ -10,7 +10,7 @@ import {
   X,
   Plus
 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../utils/Axios";
 import { useNavigate } from "react-router-dom";
 import EditProduct from './EditProduct';
 import AddProductModal from  './AddProduct';
@@ -69,15 +69,6 @@ const Dashboard = () => {
         navigate('/login/farmer');
         return;
       }
-    
-      const axiosInstance = axios.create({
-        baseURL: 'https://agrilink-1-870p.onrender.com',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true
-      });
     
       try {
         setLoading(true);

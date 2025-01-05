@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../utils/Axios';
 import { X } from 'lucide-react';
 
 const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
@@ -28,8 +28,8 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        'https://agrilink-1-870p.onrender.com/api/v1/products/add',
+      const response = await axiosInstance.post(
+        '/api/v1/products/add',
         formData,
         {
           headers: {

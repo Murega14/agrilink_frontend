@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import axios from 'axios';
 import { Filter, Search, X } from 'lucide-react';
 import ProductCard from './Productcard';
 import Navbar from './Navbar';
 import { CartContext } from '../context/Cart'
 import { ToastContainer, toast } from 'react-toastify';
+import axiosInstance from '../../utils/Axios';
 
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
@@ -30,7 +30,7 @@ const Marketplace = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('https://agrilink-1-870p.onrender.com/api/v1/products', {
+      const response = await axiosInstance.get('/api/v1/products', {
         params: {
           page: currentPage,
           per_page: screenWidth < 640 ? 6 : 12,
