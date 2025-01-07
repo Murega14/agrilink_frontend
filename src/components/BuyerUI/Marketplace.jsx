@@ -5,6 +5,7 @@ import Navbar from './Navbar';
 import { CartContext } from '../context/Cart'
 import { ToastContainer, toast } from 'react-toastify';
 import axiosInstance from '../../utils/Axios';
+import AgrilinkSpinner from '../Spinner';
 
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
@@ -282,8 +283,9 @@ const Marketplace = () => {
           <div className="w-full md:w-3/4">
             {loading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600"></div>
-              </div>
+                  <div className="flex items-center justify-center h-screen">
+                      <AgrilinkSpinner size={150} color="#1F4D4D" />
+                  </div>              </div>
             ) : error ? (
               <div className="text-red-600 text-center text-xl">
                 {error}

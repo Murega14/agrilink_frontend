@@ -4,11 +4,12 @@ import { X } from 'lucide-react';
 
 const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
   const [formData, setFormData] = useState({
+    id: product.id,
     name: product.name,
-    description: product.description || '',
+    description: product.description,
     price_per_unit: product.price_per_unit,
     amount_available: product.amount_available,
-    category: product.category || ''
+    category: product.category
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,9 +27,15 @@ const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
     setLoading(true);
     setError('');
 
+    if (!product.id) {
+      setError('Product ID is missing');
+      setLoading(false);
+      return;
+    }  
+
     try {
       const response = await axiosInstance.put(
-        `api/v1/products/update/{product.id}`,
+        `api/v1/products/update/${product.id}`,
         formData,
       );
 
@@ -78,7 +85,6 @@ const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                required
               />
             </div>
 
@@ -106,7 +112,6 @@ const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
                 min="0"
                 step="0.01"
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                required
               />
             </div>
 
@@ -121,7 +126,6 @@ const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
                 onChange={handleChange}
                 min="0"
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                required
               />
             </div>
 
@@ -135,7 +139,6 @@ const EditProduct = ({ product, isOpen, onClose, onProductUpdate }) => {
                 value={formData.category}
                 onChange={handleChange}
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                required
               />
             </div>
 

@@ -1,14 +1,22 @@
 import axios from "axios";
 
-const token = localStorage.getItem('token');
-
 const axiosInstance = axios.create({
-    baseURL: 'https://agrilink-1-870p.onrender.com',
+    baseURL: `https://agrilink-1-870p.onrender.com`,
     headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': `application/json`,
-    },
-    withCredentials: true
+        'Content-Type': `application/json`
+    }
 });
+
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+},
+(error) => {
+    return Promise.reject(error);
+}
+);
 
 export default axiosInstance;

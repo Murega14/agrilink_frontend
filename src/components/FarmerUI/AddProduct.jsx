@@ -27,17 +27,9 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
       const response = await axiosInstance.post(
         '/api/v1/products/add',
         formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        }
       );
 
       if (response.status === 201) {

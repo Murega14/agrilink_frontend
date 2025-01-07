@@ -14,6 +14,7 @@ import axiosInstance from "../../utils/Axios";
 import { useNavigate } from "react-router-dom";
 import EditProduct from './EditProduct';
 import AddProductModal from  './AddProduct';
+import AgrilinkSpinner from "../Spinner";
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -147,7 +148,9 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [navigate]);
 
-  if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  if (loading) return <div className="flex items-center justify-center h-screen">
+    <AgrilinkSpinner size={150} color="#1F4D4D" />
+</div>;
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   const { stats, recentOrders, availableProducts } = dashboardData;
@@ -293,8 +296,8 @@ const DataList = ({ title, items, type, onItemsUpdate }) => {
         {items.length === 0 ? (
           <p className="text-gray-500">No data available.</p>
         ) : (
-          items.map((item, index) => (
-            <div key={index} className="flex items-center justify-between border-b pb-2">
+          items.map((item) => (
+            <div key={item.id} className="flex items-center justify-between border-b pb-2">
               <div>
                 <p className="font-medium">{type === "order" ? item.order_number : item.name}</p>
                 <p className="text-sm text-gray-600">
