@@ -221,7 +221,7 @@ const Products = () => {
 
   const handleEditProduct = async (formData) => {
     try {
-      const response = await axiosInstance.put(`/api/v1/products/${editingProduct.id}`, {
+      const response = await axiosInstance.put(`/api/v1/products/update/${editingProduct.id}`, {
         name: formData.name,
         description: formData.description,
         price_per_unit: parseFloat(formData.price_per_unit),
