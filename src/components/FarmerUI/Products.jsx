@@ -134,7 +134,7 @@ const ProductCard = ({ product, onEdit }) => {
           <Pencil className="w-4 h-4" />
         </button>
       </div>
-      <p className="text-sm text-gray-600 mb-2">{product.description}</p>
+      <p className="text-sm text-green-600 mb-2">{product.description}</p>
       <div className="space-y-1">
         <p className="text-sm">
           <span className="font-medium">Price:</span> Ksh {product.price_per_unit}
