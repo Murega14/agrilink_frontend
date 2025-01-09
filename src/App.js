@@ -16,6 +16,11 @@ import AddProduct from './components/FarmerUI/AddProduct';
 import Cart from './components/BuyerUI/Cart';
 import UserProfile from './components/BuyerUI/UserProfile';
 import Products from './components/FarmerUI/Products';
+import Payments from './components/FarmerUI/Payments';
+import Orders from './components/FarmerUI/Orders';
+import Newsletter from './components/FarmerUI/Newsletter';
+import Analytics from './components/FarmerUI/Analytics';
+import ComingSoon from './components/context/ComingSoon';
 
 function App() {
   return (
@@ -35,6 +40,11 @@ function App() {
           <Route path='/cart' element={<Cart />} />
           <Route path='/user' element={<UserProfile />} />
           <Route path='/products' element={<Products />} />
+          <Route path='/payments' element={<Payments />} />
+          <Route path='/orders' element={<Orders />} />
+          <Route path='/newsletter' element={<Newsletter />} />
+          <Route path='/analytics' element={<Analytics />} />
+          <Route path='/comingsoon' element={<ComingSoon />} />
         </Routes>
         <ToastContainer />
       </Router>

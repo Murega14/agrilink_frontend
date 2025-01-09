@@ -38,7 +38,7 @@ const Dashboard = () => {
     { icon: CreditCard, label: "Payments", href: "/payments" },
     { icon: Box, label: "Products", href: "/products" },
     { icon: Mail, label: "Newsletter", href: "/newsletter" },
-    { icon: Scale, label: "Laws Explainer", href: "/laws" },
+    { icon: Scale, label: "Laws Explainer", href: "/comingsoon" },
   ];
   const navigate = useNavigate();
 

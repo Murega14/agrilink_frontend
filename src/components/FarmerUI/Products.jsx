@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PlusCircle, Pencil } from 'lucide-react';
+import { PlusCircle, Pencil, ArrowLeft } from 'lucide-react';
 import axiosInstance from '../../utils/Axios';
 import { useNavigate } from 'react-router-dom';
 import AgrilinkSpinner from '../Spinner';
@@ -251,6 +251,13 @@ const Products = () => {
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
+      <button 
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back to Dashboard</span>
+        </button>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Products</h1>
         <button
