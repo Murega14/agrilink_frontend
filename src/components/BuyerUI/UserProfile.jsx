@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { MapPin, Lock, Package, Mail, Phone, User, Store } from 'lucide-react';
 import axiosInstance from '../../utils/Axios';
 import { useNavigate } from 'react-router-dom';
+import AgrilinkSpinner from '../Spinner';
 
 const UserProfile = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -53,8 +54,8 @@ const UserProfile = () => {
   }, [fetchUser, navigate]);
 
   if (isLoading) {
-    return <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
-      <div className="text-gray-600">Loading profile...</div>
+    return <div className="flex items-center justify-center h-screen">
+    <AgrilinkSpinner size={150} color="#1F4D4D" />
     </div>;
   }
 

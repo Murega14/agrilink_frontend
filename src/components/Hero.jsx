@@ -1,6 +1,22 @@
 import React from "react";
 
 const Hero = () => {
+  const checkToken = () => {
+    return localStorage.getItem('token') !== null;
+  };
+
+  const handleBuyerNavigation = (e) => {
+    e.preventDefault();
+    const hasToken = checkToken();
+    window.location.href = hasToken ? '/marketplace' : '/login/buyer';
+  };
+
+  const handleFarmerNavigation = (e) => {
+    e.preventDefault();
+    const hasToken = checkToken();
+    window.location.href = hasToken ? '/dashboard' : '/login/farmer';
+  };
+
   return (
     <div className="min-h-screen bg-green-50 py-12 px-4 sm:px-6 lg:px-8">
       <main className="max-w-7xl mx-auto space-y-6">
@@ -74,8 +90,11 @@ const Hero = () => {
                 </div>
               </div>
 
-              <button className="mt-10 bg-white text-green-700 px-10 py-4 rounded-lg hover:bg-green-50 transition-colors text-xl font-bold shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                <a href="/login/buyer" className="block w-full">Sign Up as Buyer</a>
+              <button 
+                onClick={handleBuyerNavigation}
+                className="mt-10 bg-white text-green-700 px-10 py-4 rounded-lg hover:bg-green-50 transition-colors text-xl font-bold shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                Sign Up as Buyer
               </button>
             </div>
           </article>
@@ -142,8 +161,11 @@ const Hero = () => {
                 </div>
               </div>
 
-              <button className="mt-10 bg-green-600 text-white px-10 py-4 rounded-lg hover:bg-green-700 transition-colors text-xl font-bold shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2">
-                <a href="/login/farmer" className="block w-full">Register as Farmer</a>
+              <button
+                onClick={handleFarmerNavigation}
+                className="mt-10 bg-green-600 text-white px-10 py-4 rounded-lg hover:bg-green-700 transition-colors text-xl font-bold shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
+              >
+                Register as Farmer
               </button>
             </div>
           </article>
