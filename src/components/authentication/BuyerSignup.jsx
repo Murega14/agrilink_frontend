@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import axiosInstance from '../../utils/Axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,6 +39,9 @@ const BuyerSignup = () => {
             const response = await axiosInstance.post('/api/v1/signup/buyer', submitData);
 
             if (response.data.success) {
+                const token = response.data.token;
+                localStorage.setItem('token', token);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 navigate('/marketplace');
             }
         } catch (err) {

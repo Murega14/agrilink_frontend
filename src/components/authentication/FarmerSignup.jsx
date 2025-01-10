@@ -37,6 +37,9 @@ const FarmerSignup = () => {
             const response = await axios.post('https://agrilink-1-870p.onrender.com/api/v1/signup/farmer', submitDate);
 
             if (response.data.success) {
+                const token = response.data.token;
+                localStorage.setItem('token', token);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 navigate('/dashboard');
             }
         } catch (err) {
