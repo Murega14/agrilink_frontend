@@ -21,6 +21,9 @@ function LoginBuyer() {
       });
 
       if (response.data.success) {
+        const token = response.data.token;
+        localStorage.setItem('token', token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         navigate('/marketplace');
       } else {
         setError("Login Failed. Please try again");
