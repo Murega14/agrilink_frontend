@@ -70,21 +70,31 @@ const Navbar = ({ onSearch }) => {
           </div>
 
           {/* Search Bar (Desktop & Mobile) */}
-          <div className="flex-grow mx-4 max-w-xl">
-            <div className="relative">
+          <div className="flex-grow mx-2 sm:mx-4 md:max-w-xl lg:max-w-2xl">
+            <div className="relative w-full">
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
-                onChange={handleSearchChange} onKeyPress={handleKeyPress}
-                className="w-full p-2 pl-4 pr-12 text-gray-800 border border-green-200 rounded-lg shadow focus:outline-none focus:border-green-400"
+                onChange={handleSearchChange}
+                onKeyPress={handleKeyPress}
+                className="w-full p-2 sm:p-2.5 pl-3 sm:pl-4 pr-10 sm:pr-12 
+                  text-sm sm:text-base text-gray-800 
+                  border border-green-200 rounded-lg 
+                  shadow focus:outline-none focus:border-green-400 
+                  transition-all duration-200"
               />
               <button
                 onClick={handleSearchSubmit}
-                className="absolute right-0 top-0 h-full px-4 text-white bg-green-600 rounded-r-lg hover:bg-green-700 transition-colors duration-200"
+                className="absolute right-0 top-0 h-full 
+                  px-2 sm:px-4 text-white 
+                  bg-green-600 rounded-r-lg 
+                  hover:bg-green-700 
+                  transition-colors duration-200 
+                  flex items-center justify-center"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
