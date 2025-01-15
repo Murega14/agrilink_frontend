@@ -11,17 +11,7 @@ const Card = ({ children, className = "" }) => (
   </div>
 );
 
-const CardHeader = ({ children }) => (
-  <div className="p-6 border-b border-gray-200">
-    {children}
-  </div>
-);
 
-const CardTitle = ({ children }) => (
-  <h3 className="text-lg font-semibold text-gray-900">
-    {children}
-  </h3>
-);
 
 const CardContent = ({ children, className = "" }) => (
   <div className={`p-6 ${className}`}>
