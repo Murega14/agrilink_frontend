@@ -23,7 +23,7 @@ const BottomNavigation = () => {
         </Link>
         
         <Link 
-          to="/orders" 
+          to="/buyer_orders" 
           className={`flex flex-col items-center justify-center ${
             isActive('/orders') ? 'text-green-600' : 'text-gray-600'
           }`}
