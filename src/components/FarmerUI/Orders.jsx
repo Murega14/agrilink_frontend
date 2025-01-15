@@ -41,7 +41,7 @@ const Orders = () => {
           })),
           status: order.status,
           totalAmount: order.subtotal,
-          deliveryDate: order.delivery_date || 'Pending'
+          deliveryDate: order.delivery_date
         }));
         setOrders(transformedOrders);
         setLoading(false);
@@ -166,7 +166,7 @@ const Orders = () => {
                   {/* Delivery Info */}
                   <div className="text-sm">
                     <p className="font-medium">Expected Delivery</p>
-                    <p className="text-gray-600">{new Date(order.deliveryDate).toLocaleDateString()}</p>
+                    <p className="text-gray-600">{order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'Not scheduled'}</p>
                   </div>
                 </div>
               </CardContent>
