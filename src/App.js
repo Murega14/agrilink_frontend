@@ -21,6 +21,7 @@ import Orders from './components/FarmerUI/Orders';
 import Newsletter from './components/FarmerUI/Newsletter';
 import Analytics from './components/FarmerUI/Analytics';
 import ComingSoon from './components/context/ComingSoon';
+import Checkout from './components/BuyerUI/Checkout';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
           <Route path='/newsletter' element={<Newsletter />} />
           <Route path='/analytics' element={<Analytics />} />
           <Route path='/comingsoon' element={<ComingSoon />} />
+          <Route path='/checkout' element={<Checkout />} />
         </Routes>
         <ToastContainer />
       </Router>

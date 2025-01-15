@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Package, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../utils/Axios';
+import AgrilinkSpinner from '../Spinner';
 
 // Card Components
 const Card = ({ children, className = "" }) => (
@@ -29,49 +31,42 @@ const CardContent = ({ children, className = "" }) => (
 
 const Orders = () => {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const orders = [
-    {
-      id: 1,
-      orderNumber: 'ORD-2025-001',
-      date: '2025-01-08',
-      customer: 'Fresh Mart Grocers',
-      items: [
-        { name: 'Organic Tomatoes', quantity: '50 kg', price: 750.00 },
-        { name: 'Bell Peppers', quantity: '25 kg', price: 500.00 }
-      ],
-      status: 'Delivered',
-      totalAmount: 1250.00,
-      deliveryDate: '2025-01-10'
-    },
-    {
-      id: 2,
-      orderNumber: 'ORD-2025-002',
-      date: '2025-01-07',
-      customer: 'Green Foods Co.',
-      items: [
-        { name: 'Sweet Corn', quantity: '100 kg', price: 475.50 },
-        { name: 'Green Beans', quantity: '40 kg', price: 400.00 }
-      ],
-      status: 'Processing',
-      totalAmount: 875.50,
-      deliveryDate: '2025-01-12'
-    },
-    {
-      id: 3,
-      orderNumber: 'ORD-2025-003',
-      date: '2025-01-05',
-      customer: 'Local Market Chain',
-      items: [
-        { name: 'Carrots', quantity: '75 kg', price: 600.00 },
-        { name: 'Potatoes', quantity: '100 kg', price: 800.00 },
-        { name: 'Onions', quantity: '70 kg', price: 700.00 }
-      ],
-      status: 'Pending',
-      totalAmount: 2100.00,
-      deliveryDate: '2025-01-15'
-    }
-  ];
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axiosInstance.get('/api/v1/farmer/orders');
+        const transformedOrders = response.data.orders.map(order => ({
+          id: order.order_id,
+          orderNumber: `ORD-${order.order_id}`,
+          date: new Date(order.order_date).toISOString().split('T')[0],
+          customer: order.buyer_name,
+          items: order.items.map(item => ({
+            name: item.product_name,
+            quantity: `${item.quantity} kg`,
+            price: item.price_per_unit
+          })),
+          status: order.status,
+          totalAmount: order.subtotal,
+          deliveryDate: order.delivery_date || 'Pending'
+        }));
+        setOrders(transformedOrders);
+        setLoading(false);
+      } catch (err){
+        setError(err.response?.data?.error || 'Failed to fetch orders');
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  if (loading) return <div className="flex items-center justify-center h-screen">
+  <AgrilinkSpinner size={150} color="#1F4D4D" />
+  </div>;
+  if (error) return <div>Error: {error}</div>;
 
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
