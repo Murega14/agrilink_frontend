@@ -6,6 +6,7 @@ import { CartContext } from '../context/Cart'
 import { ToastContainer, toast } from 'react-toastify';
 import axiosInstance from '../../utils/Axios';
 import AgrilinkSpinner from '../Spinner';
+import BottomNavigation from './BottomNavigation';
 
 const Marketplace = () => {
   const [products, setProducts] = useState([]);
@@ -211,7 +212,7 @@ const Marketplace = () => {
       <Navbar onSearch={handleGlobalSearch} />
       <ToastContainer />
       {isSearching && (
-        <div className="container mx-auto px-4 py-2 flex justify-between items-center bg-green-100">
+        <div className="container mx-auto px-4 py-2  md:py-8 mb-16 md:mb-0 flex justify-between items-center bg-green-100">
           <p className="text-green-800">
             Search results for "{globalSearchQuery}"
           </p>
@@ -307,34 +308,31 @@ const Marketplace = () => {
             )}
 
             {/* Pagination */}
-            <div className="flex justify-center mt-6 space-x-4">
-              <button 
-                onClick={() => setPage(page - 1)} 
-                disabled={page === 1}
-                className="bg-green-600 text-white px-4 py-2 rounded-full disabled:opacity-50 text-sm"
-              >
-                Previous
-              </button>
-              <span className="text-gray-700 self-center text-sm">Page {page}</span>
-              <button 
-                onClick={() => setPage(page + 1)}
-                className="bg-green-600 text-white px-4 py-2 rounded-full text-sm"
-              >
-                Next
-              </button>
-            </div>
+            {!loading && filteredProducts.length > 0 && (
+              <div className="flex justify-center mt-6 mb-20 md:mb-6 space-x-4">
+                <button 
+                  onClick={() => setPage(page - 1)} 
+                  disabled={page === 1}
+                  className="bg-green-600 text-white px-4 py-2 rounded-full disabled:opacity-50 text-sm"
+                >
+                  Previous
+                </button>
+                <span className="text-gray-700 self-center text-sm">Page {page}</span>
+                <button 
+                  onClick={() => setPage(page + 1)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-full text-sm"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>
 
       {/* Mobile Filter Modal */}
       {isFilterMobileOpen && <FilterModal />}
-
-      <footer className="bg-green-800 text-white py-4 md:py-6">
-        <div className="container mx-auto text-center">
-          <p className="text-sm md:text-base">&copy; 2024 AgriLink - Connecting Farmers to Households</p>
-        </div>
-      </footer>
+      <BottomNavigation />
     </div>
   );
 };
