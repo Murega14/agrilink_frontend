@@ -1,20 +1,22 @@
 import React from "react";
 
 const Hero = () => {
-  const checkToken = () => {
-    return localStorage.getItem('token') !== null;
+  const checkToken = (requiredRole) => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role');
+    return token != null && userRole === requiredRole;
   };
 
   const handleBuyerNavigation = (e) => {
     e.preventDefault();
-    const hasToken = checkToken();
-    window.location.href = hasToken ? '/marketplace' : '/login/buyer';
+    const hasValidToken = checkToken('buyer');
+    window.location.href = hasValidToken ? '/marketplace': '/login/buyer';
   };
 
   const handleFarmerNavigation = (e) => {
     e.preventDefault();
-    const hasToken = checkToken();
-    window.location.href = hasToken ? '/dashboard' : '/login/farmer';
+    const hasValidToken = checkToken('farmer');
+    window.location.href = hasValidToken ? '/dashboard' : '/login/farmer';
   };
 
   return (

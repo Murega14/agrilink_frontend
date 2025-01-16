@@ -22,7 +22,8 @@ function LoginBuyer() {
 
       if (response.data.success) {
         const token = response.data.token;
-        localStorage.setItem('token', token);
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('role', response.data.role);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         navigate('/marketplace');
       } else {
