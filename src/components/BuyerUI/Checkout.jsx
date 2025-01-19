@@ -4,9 +4,6 @@ import { CartContext } from '../context/Cart';
 import { MapPin, Loader2, CreditCard, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../utils/Axios';
-import { geocode, RequestType } from 'react-geocode';
-
-
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -38,6 +35,45 @@ const Checkout = () => {
     } catch (error) {
       setLocationError(error.message);
       return false;
+    }
+  };
+
+  const reverseGeocode = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'AgriLink App' // Required by Nominatim's usage policy
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch address details');
+      }
+
+      const data = await response.json();
+      
+      if (!data || !data.address) {
+        throw new Error('No address found for this location');
+      }
+
+      return {
+        formatted_address: [
+          data.address.road,
+          data.address.suburb,
+          data.address.city || data.address.town || data.address.county,
+          data.address.state
+        ].filter(Boolean).join(', '),
+        city: data.address.city || data.address.town || data.address.county || '',
+        area: data.address.suburb || data.address.neighbourhood || '',
+        street: data.address.road || '',
+      };
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      throw new Error('Failed to get address details');
     }
   };
 
@@ -76,47 +112,26 @@ const Checkout = () => {
 
       const { latitude, longitude } = position.coords;
 
-      const { results } = await geocode(RequestType.LATLNG, `${latitude}, ${longitude}`, {
-        type: "ROOFTOP",
-        address_descriptor: true
-      });
+      try {
+        const addressData = await reverseGeocode(latitude, longitude);
 
-      if (!results?.length) {
-        throw new Error('Address for this location not found');
+        setLocation({
+          address: addressData.formatted_address,
+          city: addressData.city,
+          additionalInfo: addressData.street ? `Near ${addressData.street}, ${addressData.area}` : addressData.area,
+          coordinates: { latitude, longitude }
+        });
+
+        setFormErrors({});
+      } catch (geocodeError) {
+        console.error('Geocoding error:', geocodeError);
+        setLocationError('Unable to get precise address. Please refine the address details manually.');
+        // Still save the coordinates even if geocoding fails
+        setLocation(prev => ({
+          ...prev,
+          coordinates: { latitude, longitude }
+        }));
       }
-
-      const addressData = results[0].address_components.reduce((acc, component) => {
-        const type = component.types[0];
-        switch(type) {
-          case 'street_number':
-          case 'route':
-            acc.street = acc.street ? 
-              `${acc.street} ${component.long_name}` : 
-              component.long_name;
-            break;
-          case 'sublocality_level_1':
-            acc.area = component.long_name;
-            break;
-          case 'locality':
-          case 'administrative_area_level_2':
-            acc.city = component.long_name;
-            break;
-          default:
-            break;
-        }
-        return acc;
-      }, { street: '', area: '', city: '' });
-
-      setLocation({
-        address: results[0].formatted_address,
-        city: addressData.city,
-        additionalInfo: addressData.street && addressData.area ? 
-          `Near ${addressData.street}, ${addressData.area}` : 
-          addressData.street || addressData.area,
-        coordinates: { latitude, longitude }
-      });
-
-      setFormErrors({});
     } catch (error) {
       setLocationError(error.message || 'Failed to get location');
       setFormErrors(prev => ({
@@ -126,8 +141,7 @@ const Checkout = () => {
     } finally {
       setLoading(false);
     }
-  };
-  
+  };  
 
   const validateForm = () => {
     const errors = {};
@@ -225,7 +239,7 @@ const Checkout = () => {
                 <p className="text-red-500 text-sm mt-1">{formErrors.address}</p>
               )}
             </div>
-              <div>
+            <div>
                 <label className="block text-green-700 mb-2">City</label>
                 <input
             type="text"
