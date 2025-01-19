@@ -4,11 +4,15 @@ import { CartContext } from '../context/Cart';
 import { MapPin, Loader2, CreditCard, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../utils/Axios';
+import { geocode, RequestType } from 'react-geocode';
+
+
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, getCartTotal, clearCart } = useContext(CartContext);
   const [loading, setLoading] = useState(false);
+  const [locationError, setLocationError] = useState('');
   const [location, setLocation] = useState({
     address: '',
     city: '',
@@ -18,29 +22,112 @@ const Checkout = () => {
 
   const [formErrors, setFormErrors] = useState({});
 
-  const handleGetLocation = () => {
-    if ("geolocation" in navigator) {
-      setLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation(prev => ({
-            ...prev,
-            coordinates: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            }
-          }));
-          setLoading(false);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          setLoading(false);
-        }
-      );
-    } else {
-      alert("Geolocation is not supported by your browser");
+  const requestLocationPermission = async () => {
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+      
+      if (permissionStatus.state === 'denied') {
+        throw new Error('Please enable location access in your browser settings to use this feature.');
+      }
+      
+      if (permissionStatus.state === 'prompt') {
+        setLocationError('Please allow location access when prompted.');
+      }
+      
+      return true;
+    } catch (error) {
+      setLocationError(error.message);
+      return false;
     }
   };
+
+  const handleGetLocation = async () => {
+    try {
+      setLoading(true);
+      setLocationError('');
+      
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
+
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, 
+          (error) => {
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                reject(new Error('Location permission denied. Please enable location access in your browser settings.'));
+                break;
+              case error.POSITION_UNAVAILABLE:
+                reject(new Error('Location information is unavailable.'));
+                break;
+              case error.TIMEOUT:
+                reject(new Error('Location request timed out.'));
+                break;
+              default:
+                reject(new Error('An unknown error occurred.'));
+            }
+          }, 
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      });
+
+      const { latitude, longitude } = position.coords;
+
+      const { results } = await geocode(RequestType.LATLNG, `${latitude}, ${longitude}`, {
+        type: "ROOFTOP",
+        address_descriptor: true
+      });
+
+      if (!results?.length) {
+        throw new Error('Address for this location not found');
+      }
+
+      const addressData = results[0].address_components.reduce((acc, component) => {
+        const type = component.types[0];
+        switch(type) {
+          case 'street_number':
+          case 'route':
+            acc.street = acc.street ? 
+              `${acc.street} ${component.long_name}` : 
+              component.long_name;
+            break;
+          case 'sublocality_level_1':
+            acc.area = component.long_name;
+            break;
+          case 'locality':
+          case 'administrative_area_level_2':
+            acc.city = component.long_name;
+            break;
+          default:
+            break;
+        }
+        return acc;
+      }, { street: '', area: '', city: '' });
+
+      setLocation({
+        address: results[0].formatted_address,
+        city: addressData.city,
+        additionalInfo: addressData.street && addressData.area ? 
+          `Near ${addressData.street}, ${addressData.area}` : 
+          addressData.street || addressData.area,
+        coordinates: { latitude, longitude }
+      });
+
+      setFormErrors({});
+    } catch (error) {
+      setLocationError(error.message || 'Failed to get location');
+      setFormErrors(prev => ({
+        ...prev,
+        location: error.message || 'Failed to get location'
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   const validateForm = () => {
     const errors = {};
@@ -101,80 +188,100 @@ const Checkout = () => {
       </Link>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Delivery Information Form */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-green-900 mb-6">Delivery Information</h2>
+          
+          {locationError && (
+            <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+              {locationError}
+            </div>
+          )}
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-green-700 mb-2">Delivery Address</label>
-              <input
-                type="text"
-                value={location.address}
-                onChange={(e) => setLocation(prev => ({...prev, address: e.target.value}))}
-                className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Enter your delivery address"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={location.address}
+                  onChange={(e) => setLocation(prev => ({...prev, address: e.target.value}))}
+                  className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter your delivery address"
+                />
+                <button
+                  type="button"
+                  onClick={handleGetLocation}
+                  disabled={loading}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-700 disabled:text-green-300"
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin" size={20} />
+                  ) : (
+                    <MapPin size={20} />
+                  )}
+                </button>
+              </div>
               {formErrors.address && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.address}</p>
               )}
             </div>
+              <div>
+                <label className="block text-green-700 mb-2">City</label>
+                <input
+            type="text"
+            value={location.city}
+            onChange={(e) => setLocation(prev => ({...prev, city: e.target.value}))}
+            className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="Enter your city"
+            readOnly={!!location.coordinates}
+                />
+                {formErrors.city && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.city}</p>
+                )}
+              </div>
 
-            <div>
-              <label className="block text-green-700 mb-2">City</label>
-              <input
-                type="text"
-                value={location.city}
-                onChange={(e) => setLocation(prev => ({...prev, city: e.target.value}))}
-                className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Enter your city"
-              />
-              {formErrors.city && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.city}</p>
-              )}
-            </div>
+              <div>
+                <label className="block text-green-700 mb-2">Additional Information (Optional)</label>
+                <textarea
+            value={location.additionalInfo}
+            onChange={(e) => setLocation(prev => ({...prev, additionalInfo: e.target.value}))}
+            className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="Apartment number, landmarks, etc."
+            rows="3"
+            readOnly={!!location.coordinates}
+                />
+              </div>
 
-            <div>
-              <label className="block text-green-700 mb-2">Additional Information (Optional)</label>
-              <textarea
-                value={location.additionalInfo}
-                onChange={(e) => setLocation(prev => ({...prev, additionalInfo: e.target.value}))}
-                className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Apartment number, landmarks, etc."
-                rows="3"
-              />
-            </div>
+              <div className="flex items-center text-sm text-green-600">
+                {location.coordinates ? (
+            <>
+              <MapPin className="mr-2" size={16} />
+              <span>Location shared successfully</span>
+            </>
+                ) : (
+            <>
+              <MapPin className="mr-2" size={16} />
+              <span>Click the location icon to auto-fill address</span>
+            </>
+                )}
+              </div>
 
-            <div>
               <button
-                type="button"
-                onClick={handleGetLocation}
-                className="w-full bg-green-100 text-green-700 py-3 rounded-lg hover:bg-green-200 flex items-center justify-center"
+                type="submit"
+                disabled={loading}
+                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 flex items-center justify-center disabled:bg-green-300"
               >
-                <MapPin className="mr-2" size={20} />
-                {location.coordinates ? 'Location Shared' : 'Share My Location'}
+                {loading ? (
+            <Loader2 className="mr-2 animate-spin" size={20} />
+                ) : (
+            <CreditCard className="mr-2" size={20} />
+                )}
+                Place Order (Ksh {getCartTotal() + 100})
               </button>
-              {formErrors.coordinates && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.coordinates}</p>
-              )}
-            </div>
+            </form>
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 flex items-center justify-center disabled:bg-green-300"
-            >
-              {loading ? (
-                <Loader2 className="mr-2 animate-spin" size={20} />
-              ) : (
-                <CreditCard className="mr-2" size={20} />
-              )}
-              Place Order (Ksh {getCartTotal() + 100})
-            </button>
-          </form>
-        </div>
-
-        {/* Order Summary */}
+          {/* Order Summary */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-green-900 mb-6">Order Summary</h2>
           

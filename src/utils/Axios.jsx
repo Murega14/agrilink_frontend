@@ -31,6 +31,7 @@ axiosInstance.interceptors.response.use(
                 const refreshToken = localStorage.getItem('refreshToken');
                 if (!refreshToken) {
                     localStorage.removeItem('token');
+                    localStorage.removeItem('role');
                     window.location.href = '/';
                     return Promise.reject(error);
                 }
@@ -47,6 +48,7 @@ axiosInstance.interceptors.response.use(
             } catch (refreshError) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
+                localStorage.removeItem('role');
                 window.location.href = '/';
                 return Promise.reject(refreshError);
             }
