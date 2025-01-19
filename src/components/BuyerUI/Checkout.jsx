@@ -38,14 +38,34 @@ const Checkout = () => {
     }
   };
 
+  const formatAdditionalInfo = (address) => {
+    const details = [];
+    
+    // Add nearby landmarks or areas
+    if (address.amenity) details.push(`Near ${address.amenity}`);
+    if (address.neighbourhood) details.push(address.neighbourhood);
+    if (address.suburb) details.push(address.suburb);
+    
+    // Add building or house number if available
+    if (address.house_number) {
+      details.push(`House/Building ${address.house_number}`);
+    }
+    
+    // Add road/street name
+    if (address.road) details.push(`${address.road}`);
+    
+    // Filter out any empty values and join
+    return details.filter(Boolean).join(', ');
+  };
+
   const reverseGeocode = async (latitude, longitude) => {
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&zoom=18`,
         {
           headers: {
             'Accept': 'application/json',
-            'User-Agent': 'AgriLink App' // Required by Nominatim's usage policy
+            'User-Agent': 'AgriLink App'
           }
         }
       );
@@ -68,8 +88,8 @@ const Checkout = () => {
           data.address.state
         ].filter(Boolean).join(', '),
         city: data.address.city || data.address.town || data.address.county || '',
-        area: data.address.suburb || data.address.neighbourhood || '',
-        street: data.address.road || '',
+        additional_info: formatAdditionalInfo(data.address),
+        raw_address: data.address // Keep the raw address data for detailed info
       };
     } catch (error) {
       console.error('Reverse geocoding error:', error);
@@ -118,9 +138,10 @@ const Checkout = () => {
         setLocation({
           address: addressData.formatted_address,
           city: addressData.city,
-          additionalInfo: addressData.street ? `Near ${addressData.street}, ${addressData.area}` : addressData.area,
+          additionalInfo: addressData.additional_info,
           coordinates: { latitude, longitude }
         });
+        console.log(location);
 
         setFormErrors({});
       } catch (geocodeError) {
@@ -141,7 +162,7 @@ const Checkout = () => {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const validateForm = () => {
     const errors = {};
@@ -255,16 +276,15 @@ const Checkout = () => {
               </div>
 
               <div>
-                <label className="block text-green-700 mb-2">Additional Information (Optional)</label>
-                <textarea
-            value={location.additionalInfo}
-            onChange={(e) => setLocation(prev => ({...prev, additionalInfo: e.target.value}))}
-            className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="Apartment number, landmarks, etc."
-            rows="3"
-            readOnly={!!location.coordinates}
-                />
-              </div>
+              <label className="block text-green-700 mb-2">Additional Information</label>
+              <textarea
+                value={location.additionalInfo}
+                onChange={(e) => setLocation(prev => ({...prev, additionalInfo: e.target.value}))}
+                className="w-full p-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Apartment number, landmarks, etc."
+                rows="3"
+              />
+            </div>
 
               <div className="flex items-center text-sm text-green-600">
                 {location.coordinates ? (
