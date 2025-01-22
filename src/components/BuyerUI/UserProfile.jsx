@@ -82,7 +82,7 @@ const UserProfile = () => {
       <nav className="bg-white shadow-md mb-6 max-w-7xl mx-auto rounded-lg">
         <div className="flex space-x-4 p-4">
           <button
-            onClick={() => navigate('/orders/pending')}
+            onClick={() => navigate('/user_orders')}
             className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md flex items-center space-x-2"
           >
             <Package className="w-5 h-5" />
