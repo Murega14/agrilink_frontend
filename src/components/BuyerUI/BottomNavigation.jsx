@@ -23,9 +23,9 @@ const BottomNavigation = () => {
         </Link>
         
         <Link 
-          to="/buyer_orders" 
+          to="/user_orders" 
           className={`flex flex-col items-center justify-center ${
-            isActive('/orders') ? 'text-green-600' : 'text-gray-600'
+            isActive('/user_orders') ? 'text-green-600' : 'text-gray-600'
           }`}
         >
           <ShoppingBag size={24} />

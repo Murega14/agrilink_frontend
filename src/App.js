@@ -22,6 +22,8 @@ import Newsletter from './components/FarmerUI/Newsletter';
 import Analytics from './components/FarmerUI/Analytics';
 import ComingSoon from './components/context/ComingSoon';
 import Checkout from './components/BuyerUI/Checkout';
+import SuccessPage from './components/BuyerUI/SuccessPage';
+import UserOrders from './components/BuyerUI/UserOrders';
 
 function App() {
   return (
@@ -47,6 +49,8 @@ function App() {
           <Route path='/analytics' element={<Analytics />} />
           <Route path='/comingsoon' element={<ComingSoon />} />
           <Route path='/checkout' element={<Checkout />} />
+          <Route path='/success' element={<SuccessPage />} />
+          <Route path='/user_orders' element={<UserOrders />} />
         </Routes>
         <ToastContainer />
       </Router>

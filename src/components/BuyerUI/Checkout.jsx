@@ -203,7 +203,7 @@ const Checkout = () => {
 
       // Clear cart and redirect to success page
       clearCart();
-      navigate('/order-success');
+      navigate('/success');
     } catch (error) {
       console.error('Error creating order:', error);
       alert('Failed to create order. Please try again.');
