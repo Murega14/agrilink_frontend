@@ -27,35 +27,49 @@ const Marketplace = () => {
   const [isSearching, setIsSearching] = useState(false);
 
 
-  // Use useCallback to memoize fetchProducts
   const fetchProducts = useCallback(async (currentPage, query = '') => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosInstance.get('/api/v1/products', {
-        params: {
-          page: currentPage,
-          per_page: screenWidth < 640 ? 6 : 12,
-          search: query
+        const response = await axiosInstance.get('/api/v1/products', {
+            params: {
+                page: currentPage,
+                per_page: screenWidth < 640 ? 6 : 12,
+                search: query
+            }
+        });
+        
+        // Ensure response.data is an array
+        const data = Array.isArray(response.data) ? response.data : [];
+        
+        if (query) {
+            setSearchResults(data);
+            setIsSearching(true);
+        } else {
+            setProducts(data);
+            setIsSearching(false);
         }
-      });
-      
-      // Update products based on search
-      if (query) {
-        setSearchResults(response.data);
-        setIsSearching(true);
-      } else {
-        setProducts(response.data);
-        setIsSearching(false);
-      }
-      
-      setLoading(false);
+        
+        setLoading(false);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to fetch products. Please try again.');
-      setLoading(false);
+        console.error('Error fetching products:', error);
+        setError('Failed to fetch products. Please try again.');
+        setLoading(false);
     }
-  }, [screenWidth]);
+}, [screenWidth]);
+
+// Ensure productsToFilter is always an array
+  const productsToFilter = (isSearching ? searchResults : products) || [];
+
+  const filteredProducts = productsToFilter.filter(product => {
+      const categoryMatch = !filters.category || 
+        product.category === filters.category;
+      const minPriceMatch = !filters.minPrice || product.price >= parseFloat(filters.minPrice);
+      const maxPriceMatch = !filters.maxPrice || product.price <= parseFloat(filters.maxPrice);
+      const searchMatch = !filters.search || 
+        product.name.toLowerCase().includes(filters.search.toLowerCase());
+      return categoryMatch && minPriceMatch && maxPriceMatch && searchMatch;
+  });
 
   const handleGlobalSearch = (query) => {
     setGlobalSearchQuery(query);
@@ -107,19 +121,6 @@ const Marketplace = () => {
     }
   }, [page, fetchProducts, globalSearchQuery]);
 
-   // Determine which products to use for filtering
-  const productsToFilter = isSearching ? searchResults : products;
-
-  // Apply filters to the current set of products
-  const filteredProducts = productsToFilter.filter(product => {
-    const categoryMatch = !filters.category || 
-      product.category === filters.category;
-    const minPriceMatch = !filters.minPrice || product.price >= parseFloat(filters.minPrice);
-    const maxPriceMatch = !filters.maxPrice || product.price <= parseFloat(filters.maxPrice);
-    const searchMatch = !filters.search || 
-      product.name.toLowerCase().includes(filters.search.toLowerCase());
-    return categoryMatch && minPriceMatch && maxPriceMatch && searchMatch;
-  });
 
   // Mobile Filter Modal
   const FilterModal = () => (
