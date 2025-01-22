@@ -39,14 +39,14 @@ const Marketplace = () => {
             }
         });
         
-        // Ensure response.data is an array
-        const data = Array.isArray(response.data) ? response.data : [];
+        // Extract the products array from the response
+        const productsArray = response.data?.products || [];
         
         if (query) {
-            setSearchResults(data);
+            setSearchResults(productsArray);
             setIsSearching(true);
         } else {
-            setProducts(data);
+            setProducts(productsArray);
             setIsSearching(false);
         }
         
