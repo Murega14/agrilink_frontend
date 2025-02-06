@@ -1,70 +1,169 @@
-# Getting Started with Create React App
+# AgriLink
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+AgriLink is a web application designed to connect farmers directly with buyers, providing a seamless platform for purchasing fresh, local produce. The application offers features for both farmers and buyers, including account management, product listings, order tracking, and more.
 
-## Available Scripts
+## Table of Contents
 
-In the project directory, you can run:
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### For Buyers
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Marketplace**: Browse and purchase fresh produce directly from farmers.
+- **Order Management**: Track and manage your orders.
+- **User Profile**: Manage your personal information and view order history.
+- **Cart**: Add products to your cart and proceed to checkout.
 
-### `npm test`
+### For Farmers
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Dashboard**: View statistics on products sold, current month value, pending orders, and active listings.
+- **Product Management**: Add, edit, and manage your product listings.
+- **Order Management**: View and manage orders placed by buyers.
+- **Payments**: Track your earnings and view recent payments.
+- **Analytics**: Gain insights into revenue trends, product sales distribution, and customer growth.
 
-### `npm run build`
+## Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+To get started with AgriLink, follow these steps:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. **Clone the repository**:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    ```sh
+    git clone https://github.com/your-username/agrilink.git
+    cd agrilink
+    ```
 
-### `npm run eject`
+2. **Install dependencies**:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    ```sh
+    npm install
+    ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. **Set up environment variables**:
+    Create a `.env` file in the root directory and add the necessary environment variables. Example:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+    ```env
+    REACT_APP_API_BASE_URL=https://agrilink-1-870p.onrender.com
+    ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+4. **Start the development server**:
 
-## Learn More
+    ```sh
+    npm start
+    ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Usage
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Running the Application
 
-### Code Splitting
+To run the application locally, use the following command:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```sh
+npm start
+```
 
-### Analyzing the Bundle Size
+This will start the development server and open the application in your default web browser.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Building for Production
 
-### Making a Progressive Web App
+To create a production build of the application, use the following command:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```sh
+npm run build
+```
 
-### Advanced Configuration
+This will generate optimized static files in the `build` directory.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Project Structure
 
-### Deployment
+The project structure is organized as follows:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```markdown
+.
+├── public/
+│   ├── index.html
+│   ├── manifest.json
+│   └── robots.txt
+├── src/
+│   ├── components/
+│   │   ├── authentication/
+│   │   │   ├── BuyerSignup.jsx
+│   │   │   ├── FarmerSignup.jsx
+│   │   │   ├── ForgotPassword.jsx
+│   │   │   ├── LoginBuyer.jsx
+│   │   │   ├── LoginFarmer.jsx
+│   │   │   └── ResetPassword.jsx
+│   │   ├── BuyerUI/
+│   │   │   ├── BottomNavigation.jsx
+│   │   │   ├── Cart.jsx
+│   │   │   ├── Checkout.jsx
+│   │   │   ├── Marketplace.jsx
+│   │   │   ├── ProductCard.jsx
+│   │   │   ├── SuccessPage.jsx
+│   │   │   └── UserOrders.jsx
+│   │   ├── FarmerUI/
+│   │   │   ├── AddProduct.jsx
+│   │   │   ├── Analytics.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── EditProduct.jsx
+│   │   │   ├── Newsletter.jsx
+│   │   │   ├── Orders.jsx
+│   │   │   ├── Payments.jsx
+│   │   │   └── Products.jsx
+│   │   ├── context/
+│   │   │   ├── Cart.jsx
+│   │   │   └── ComingSoon.jsx
+│   │   ├── Hero.jsx
+│   │   ├── Spinner.jsx
+│   ├── utils/
+│   │   └── Axios.jsx
+│   ├── App.css
+│   ├── App.js
+│   ├── App.test.js
+│   ├── index.css
+│   ├── index.js
+│   ├── output.css
+│   ├── reportWebVitals.js
+│   └── setupTests.js
+├── .env
+├── .gitignore
+├── package.json
+├── README.md
+└── tailwind.config.js
+```
 
-### `npm run build` fails to minify
+## Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+We welcome contributions to AgriLink! To contribute, follow these steps:
+
+1. **Fork the repository**.
+2. **Create a new branch**:
+
+    ```sh
+    git checkout -b feature/your-feature-name
+    ```
+
+3. **Make your changes**.
+4. **Commit your changes**:
+
+    ```sh
+    git commit -m 'Add some feature'
+    ```
+
+5. **Push to the branch**:
+
+    ```sh
+    git push origin feature/your-feature-name
+    ```
+
+6. **Open a pull request**.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
